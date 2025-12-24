@@ -1,14 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
-import { MapPin, ArrowBigUp, Share2, MoreVertical } from 'lucide-react';
+import { MapPin, ArrowBigUp, Share2, MoreVertical, Link as LinkIcon, Check } from 'lucide-react';
 
 export default function PostCard({ report }) {
     const { post, processing } = useForm();
+    const [copied, setCopied] = useState(false);
+    const shareUrl = `${window.location.origin}/laporan/${report.id}`;
+    const shareTitle = `SIPEKA: Mohon perhatian, ada jalan rusak di ${report.lokasi_detail}`;
 
     const handleUpvote = () => {
         post(route('upvote.toggle', report?.id), {
-            preserveScroll: true, // Agar saat klik, posisi scroll tidak lompat ke atas
+            preserveScroll: true,
         });
+    };
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'SIPEKA Madukara',
+                    text: shareTitle,
+                    url: shareUrl,
+                });
+            } catch (err) {
+                console.log('Batal berbagi:', err);
+            }
+        } else {
+            copyToClipboard();
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
     
     return (
@@ -32,7 +57,6 @@ export default function PostCard({ report }) {
                 {/* </Link> */}
             </div>
 
-            {/* Foto Jalan */}
             <Link href={route('laporan.show', report?.id)}>
                 <div className="relative aspect-video bg-gray-100">
                     <img 
@@ -51,7 +75,6 @@ export default function PostCard({ report }) {
                 </div>
             </Link>
 
-            {/* Content */}
             <div className="p-4">
                 {/* <h3 className="font-bold text-lg text-blue-900 mb-1">{report.judul_laporan}</h3> */}
                 <Link href={route('laporan.show', report?.id)}>
@@ -82,9 +105,21 @@ export default function PostCard({ report }) {
                         />
                         <span className="font-bold">{report.total_upvote} Upvotes</span>
                     </button>
-                    <button className="flex items-center space-x-1 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-lg transition">
-                        <Share2 size={20} />
-                        <span className="text-sm">Bagikan</span>
+                    <button 
+                        onClick={handleShare}
+                        className="flex items-center space-x-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+                    >
+                        {copied ? (
+                            <>
+                                <Check size={20} className="text-green-500" />
+                                <span className="text-xs font-bold text-green-500">Tersalin!</span>
+                            </>
+                        ) : (
+                            <>
+                                <Share2 size={20} />
+                                <span className="text-xs font-bold">Bagikan</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
