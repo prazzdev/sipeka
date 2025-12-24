@@ -31,7 +31,7 @@ export default function Beranda({ auth, reports }) {
                     {/* List Postingan */}
                     {reports.length > 0 ? (
                         reports.map((report) => (
-                            <PostCard key={report.id} report={report} />
+                            <PostCard key={report.id} report={report} auth={auth} />
                         ))
                     ) : (
                         <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">

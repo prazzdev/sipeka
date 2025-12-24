@@ -147,4 +147,21 @@ class ReportController extends Controller
         // Download file PDF
         return $pdf->download('laporan-sipeka-' . date('Y-m-d') . '.pdf');
     }
+
+    public function destroy(Report $report)
+    {
+        // Proteksi: Hanya pemilik laporan atau admin yang boleh menghapus
+        if (auth()->id() !== $report->user_id && auth()->user()->role !== 'admin') {
+            abort(403, 'Anda tidak memiliki otoritas.');
+        }
+
+        // Hapus file foto dari folder storage agar tidak menumpuk sampah
+        if ($report->foto_jalan) {
+            Storage::disk('public')->delete($report->foto_jalan);
+        }
+
+        $report->delete();
+
+        return redirect()->route('beranda')->with('message', 'Laporan berhasil dihapus.');
+    }
 }

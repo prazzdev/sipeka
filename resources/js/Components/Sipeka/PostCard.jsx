@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useForm } from '@inertiajs/react';
-import { MapPin, ArrowBigUp, Share2, MoreVertical, Link as LinkIcon, Check } from 'lucide-react';
+import { Link, router, useForm } from '@inertiajs/react';
+import { MapPin, 
+    ArrowBigUp, 
+    Share2, 
+    MoreVertical, 
+    Link as LinkIcon, 
+    Check,
+    AlertTriangle, 
+    ExternalLink,
+    Trash2, 
+    Edit } from 'lucide-react';
 
-export default function PostCard({ report }) {
+export default function PostCard({ report, auth }) {
     const { post, processing } = useForm();
+    const [showMenu, setShowMenu] = useState(false);
     const [copied, setCopied] = useState(false);
     const shareUrl = `${window.location.origin}/laporan/${report.id}`;
     const shareTitle = `SIPEKA: Mohon perhatian, ada jalan rusak di ${report.lokasi_detail}`;
@@ -35,6 +45,15 @@ export default function PostCard({ report }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+
+    const handleDelete = () => {
+        if (confirm('Apakah Anda yakin ingin menghapus laporan ini secara permanen?')) {
+            router.delete(route('laporan.destroy', report.id), {
+                preserveScroll: true,
+                onSuccess: () => setShowMenu(false),
+            });
+        }
+    };
     
     return (
         <div className="bg-white border border-gray-200 rounded-xl mb-6 overflow-hidden shadow-sm">
@@ -52,9 +71,50 @@ export default function PostCard({ report }) {
                 {/* <Link 
                     href={route('laporan.show', report.id)}
                     className="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100"
-                > */}
+                >
                     <button className="text-gray-500"><MoreVertical size={20} /></button>
-                {/* </Link> */}
+                </Link> */}
+                <div className="relative">
+                    <button 
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="p-1 hover:bg-gray-100 rounded-full transition"
+                    >
+                        <MoreVertical size={20} className="text-gray-500" />
+                    </button>
+
+                    {/* DROPDOWN MENU */}
+                    {showMenu && (
+                        <>
+                            {/* Overlay transparan agar bisa tutup menu saat klik di mana saja */}
+                            <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>
+                            
+                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl z-20 py-2 overflow-hidden animate-in fade-in zoom-in duration-150">
+                                {/* Opsi 1: Lihat Detail */}
+                                <Link 
+                                    href={route('laporan.show', report.id)}
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
+                                >
+                                    <ExternalLink size={16} className="mr-2" /> Lihat Detail
+                                </Link>
+
+                                {/* Opsi 2: Hapus (Hanya muncul untuk pemilik/admin) */}
+                                {(auth.user.id === report.user_id || auth.user.role === 'admin') ? (
+                                    <button 
+                                        onClick={handleDelete}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition border-t border-gray-50"
+                                    >
+                                        <Trash2 size={16} className="mr-2" /> Hapus Laporan
+                                    </button>
+                                ) : (
+                                    /* Opsi 3: Laporkan (Jika orang lain) */
+                                    <button className="flex items-center w-full px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 transition border-t border-gray-50">
+                                        <AlertTriangle size={16} className="mr-2" /> Laporkan Spam
+                                    </button>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
 
             <Link href={route('laporan.show', report?.id)}>
