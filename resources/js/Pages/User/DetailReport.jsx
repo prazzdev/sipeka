@@ -48,11 +48,18 @@ export default function DetailReport({ auth, report }) {
     };
     
     return (
+
         <AuthenticatedLayout
             user={auth.user}
             header={<h2 className="font-bold text-blue-900 text-xl leading-tight">Detail Laporan</h2>}
         >
             <Head title={`Detail - ${report.judul_laporan}`} />
+            <Head>
+                {/* <title>{report.judul_laporan}</title> */}
+                <meta property="og:title" content={report.judul_laporan} />
+                <meta property="og:description" content={report.lokasi_detail} />
+                <meta property="og:image" content={`/storage/${report.foto_jalan}`} />
+            </Head>
 
             <div className="px-4 py-8">
                 <div className="mx-auto max-w-4xl">
