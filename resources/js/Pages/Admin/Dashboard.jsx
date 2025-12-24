@@ -166,7 +166,7 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                             </tr>
                                         ))
                                     ) : (
-                                        <div className="text-center py-20 bg-white rounded-2xl border border-dashed">
+                                        <div className="w-full text-center py-20 bg-white rounded-md border border-dashed">
                                             <p className="text-gray-500 font-medium">Belum ada laporan saat ini.</p>
                                         </div>
                                     )}
@@ -175,14 +175,12 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                             <div className="mt-6 flex flex-wrap justify-center items-center gap-1">
                                 {reports.links && reports.links.map((link, k) => (
                                     link.url === null ? (
-                                        // Gunakan span jika URL null agar tidak error .toString()
                                         <span
                                             key={k}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                             className="px-4 py-2 text-sm rounded-lg border border-gray-100 text-gray-300 cursor-not-allowed"
                                         />
                                     ) : (
-                                        // Gunakan Link hanya jika URL tersedia
                                         <Link
                                             key={k}
                                             href={link.url}
@@ -192,7 +190,7 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                     ? 'bg-blue-900 text-white border-blue-900 font-bold shadow-sm' 
                                                     : 'bg-white text-gray-600 border-gray-200 hover:border-blue-900 hover:text-blue-900'
                                             }`}
-                                            preserveScroll // Sangat disarankan agar posisi scroll tidak lompat
+                                            preserveScroll
                                         />
                                     )
                                 ))}

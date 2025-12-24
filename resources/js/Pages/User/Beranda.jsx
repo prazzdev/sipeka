@@ -1,10 +1,11 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PostCard from '@/Components/Sipeka/PostCard';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Clock, TrendingUp } from 'lucide-react';
 
 export default function Beranda({ auth, reports, filters }) {
+    const { processing } = usePage();
 
     const handleSort = (type) => {
         router.get(route('beranda'), { sort: type }, { 
@@ -72,7 +73,7 @@ export default function Beranda({ auth, reports, filters }) {
                     </div>
                     
                     {/* List Postingan */}
-                    <div className="space-y-6">
+                    <div className={`space-y-6 transition-opacity duration-300 ${processing ? 'opacity-50' : 'opacity-100'}`}>
                         {reports.data.length > 0 ? (
                             reports.data.map((report) => (
                                 <PostCard key={report.id} report={report} auth={auth} />
