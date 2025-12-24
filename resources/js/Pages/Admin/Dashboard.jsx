@@ -1,7 +1,7 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer } from 'lucide-react';
 
 export default function Dashboard({ auth, reports, stats, filters = {} }) {
     const { patch } = useForm();
@@ -52,6 +52,15 @@ export default function Dashboard({ auth, reports, stats, filters = {} }) {
                                 <option value="diproses">Diproses</option>
                                 <option value="selesai">Selesai</option>
                             </select>
+                            <div className="flex gap-2">
+                                <a 
+                                    href={route('admin.export', { status: filters.status })} 
+                                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-sm"
+                                >
+                                    <Printer size={16} className="mr-2" />
+                                    Cetak PDF
+                                </a>
+                            </div>
                         </div>
 
                         <div className="flex items-center space-x-2">

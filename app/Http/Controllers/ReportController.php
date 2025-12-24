@@ -6,6 +6,7 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -120,5 +121,30 @@ class ReportController extends Controller
         $report->update(['status' => $request->status]);
 
         return redirect()->back()->with('message', 'Status laporan berhasil diperbarui!');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $statusFilter = $request->query('status');
+        $query = Report::with('user');
+
+        if ($statusFilter) {
+            $query->where('status', $statusFilter);
+        }
+
+        $reports = $query->latest()->get();
+
+        // Data yang akan dikirim ke view PDF
+        $data = [
+            'title' => 'Laporan Kerusakan Jalan Kecamatan Madukara',
+            'date' => date('d/m/Y'),
+            'reports' => $reports,
+            'status' => $statusFilter ?? 'Semua'
+        ];
+
+        $pdf = Pdf::loadView('pdf.reports', $data);
+        
+        // Download file PDF
+        return $pdf->download('laporan-sipeka-' . date('Y-m-d') . '.pdf');
     }
 }

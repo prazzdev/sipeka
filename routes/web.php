@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
     Route::get('/admin/dashboard', [ReportController::class, 'adminDashboard'])->name('admin.dashboard');
     Route::patch('/admin/laporan/{report}/status', [ReportController::class, 'updateStatus'])->name('admin.status.update');
+    Route::get('/admin/export-pdf', [ReportController::class, 'exportPdf'])->name('admin.export');
 
     // Komentar pada Laporan
     Route::post('/laporan/{report}/komentar', [CommentController::class, 'store'])->name('komentar.store');
