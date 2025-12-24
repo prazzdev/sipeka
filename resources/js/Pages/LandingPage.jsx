@@ -40,8 +40,8 @@ export default function LandingPage({ canLogin, canRegister }) {
             </nav>
 
             {/* Hero Section */}
-            <header className="max-w-7xl mx-auto px-8 py-20 grid lg:grid-cols-2 gap-12 items-center">
-                <div className="space-y-8">
+            <header className="max-w-7xl mx-auto px-6 md:px-8 py-10 md:py-20 grid lg:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6 md:space-y-8 text-center lg:text-left">
                     <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
                         <span className="relative flex h-3 w-3">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -49,17 +49,17 @@ export default function LandingPage({ canLogin, canRegister }) {
                         </span>
                         <span className="text-sm font-bold text-blue-900 uppercase tracking-widest">Kecamatan Madukara</span>
                     </div>
-                    <h1 className="text-6xl font-black leading-tight text-blue-900">
-                        Suarakan Kerusakan, <span className="text-yellow-500 underline decoration-blue-900 decoration-8 underline-offset-8">Wujudkan</span> Jalan Mulus.
+                    <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
+                        Suarakan Kerusakan, <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">Wujudkan</span> Jalan Mulus.
                     </h1>
                     <p className="text-xl text-gray-500 leading-relaxed max-w-lg">
                         SIPEKA hadir untuk mempercepat pelaporan kerusakan jalan secara transparan berbasis GIS. Bantu Dinas PUPR memetakan prioritas perbaikan dengan satu genggaman.
                     </p>
-                    <div className="flex gap-4">
-                        <Link href={route('register')} className="bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <Link href={route('register')} className="w-full sm:w-auto bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200">
                             Laporkan Sekarang <ArrowRight size={20} />
                         </Link>
-                        <Link href={route('login')} className="border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition">
+                        <Link href={route('login')} className="w-full sm:w-auto border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition">
                             Lihat Peta
                         </Link>
                     </div>
