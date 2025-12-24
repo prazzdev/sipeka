@@ -1,9 +1,18 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PostCard from '@/Components/Sipeka/PostCard';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Clock, TrendingUp } from 'lucide-react';
 
-export default function Beranda({ auth, reports }) {
+export default function Beranda({ auth, reports, filters }) {
+
+    const handleSort = (type) => {
+        router.get(route('beranda'), { sort: type }, { 
+            preserveState: true, 
+            preserveScroll: true 
+        });
+    };
+    
     return (
         <AuthenticatedLayout
             user={auth?.user}
@@ -27,7 +36,41 @@ export default function Beranda({ auth, reports }) {
                             Lapor!
                         </Link>
                     </div>
+                    
+                    {/* Filter Sorting */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                        <div>
+                            <h2 className="text-xl font-black text-blue-900">Feed Laporan</h2>
+                            <p className="text-xs text-gray-500">Pantau kondisi jalan di Madukara</p>
+                        </div>
 
+                        <div className="inline-flex bg-gray-200/50 p-1 rounded-2xl backdrop-blur-sm border border-gray-100">
+                            <button
+                                onClick={() => handleSort('terbaru')}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                    (!filters.sort || filters.sort === 'terbaru') 
+                                    ? 'bg-white text-blue-900 shadow-md ring-1 ring-black/5' 
+                                    : 'text-gray-500 hover:text-blue-900 hover:bg-gray-100'
+                                }`}
+                            >
+                                <Clock size={16} className={(!filters.sort || filters.sort === 'terbaru') ? 'text-blue-600' : ''} />
+                                Terbaru
+                            </button>
+                            
+                            <button
+                                onClick={() => handleSort('populer')}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                    filters.sort === 'populer' 
+                                    ? 'bg-white text-blue-900 shadow-md ring-1 ring-black/5' 
+                                    : 'text-gray-500 hover:text-blue-900 hover:bg-gray-100'
+                                }`}
+                            >
+                                <TrendingUp size={16} className={filters.sort === 'populer' ? 'text-orange-500' : ''} />
+                                Populer
+                            </button>
+                        </div>
+                    </div>
+                    
                     {/* List Postingan */}
                     <div className="space-y-6">
                         {reports.data.length > 0 ? (

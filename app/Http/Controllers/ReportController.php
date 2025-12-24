@@ -12,18 +12,26 @@ class ReportController extends Controller
 {
     public function index(Request $request) 
     {
-        $reports = Report::with('user')
+        $query = Report::with('user')
             ->withExists(['upvotes as upvoted' => function($query) {
                 $query->where('user_id', auth()->id());
             }])
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->latest();
+
+        // Logika Filter Sorting
+        if ($request->sort === 'populer') {
+            // Urutkan berdasarkan total_upvote terbanyak
+            $query->orderBy('total_upvote', 'desc');
+        } else {
+            // Default: Terbaru
+            $query->latest();
+        }
+
+        $reports = $query->paginate(10)->withQueryString();
 
         return Inertia::render('User/Beranda', [
             'reports' => $reports,
-            // Sekarang $request sudah aman digunakan
-            'filters' => $request->only(['status']) 
+            'filters' => $request->only(['sort']) 
         ]);
     }
     // Menyimpan laporan baru ke database
