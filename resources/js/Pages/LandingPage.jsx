@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 import { MapPin, ShieldCheck, MessageSquare, BarChart3, ArrowRight } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
-export default function LandingPage({ canLogin, canRegister }) {
+export default function LandingPage({ canLogin, canRegister, auth }) {
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900">
             <Head title="SIPEKA - Sistem Pelaporan Kerusakan Jalan" />
@@ -19,22 +19,32 @@ export default function LandingPage({ canLogin, canRegister }) {
                 </div>
 
                 <div className="flex items-center gap-3 md:gap-6">
-                    {canLogin && (
+                    {auth.user ? (
                         <Link 
-                            href={route('login')} 
-                            className="text-sm md:text-base font-bold text-gray-600 hover:text-blue-900 transition"
+                            href={route('beranda')} 
+                            className="bg-blue-900 hover:bg-blue-800 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold transition-all shadow-lg shadow-blue-200"
                         >
-                            Masuk
+                            Ke Beranda
                         </Link>
-                    )}
-                    
-                    {canRegister && (
-                        <Link 
-                            href={route('register')} 
-                            className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-black shadow-lg shadow-yellow-200 transition-all active:scale-95 whitespace-nowrap"
-                        >
-                            Daftar Sekarang
-                        </Link>
+                    ) : (
+                        <>
+                            {canLogin && (
+                                <Link 
+                                    href={route('login')} 
+                                    className="text-sm md:text-base font-bold text-gray-600 hover:text-blue-900 transition"
+                                >
+                                    Masuk
+                                </Link>
+                            )}
+                            {canRegister && (
+                                <Link 
+                                    href={route('register')} 
+                                    className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-black shadow-lg shadow-yellow-200 transition-all active:scale-95 whitespace-nowrap"
+                                >
+                                    Daftar
+                                </Link>
+                            )}
+                        </>
                     )}
                 </div>
             </nav>
@@ -56,12 +66,29 @@ export default function LandingPage({ canLogin, canRegister }) {
                         SIPEKA hadir untuk mempercepat pelaporan kerusakan jalan secara transparan berbasis GIS. Bantu Dinas PUPR memetakan prioritas perbaikan dengan satu genggaman.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <Link href={route('register')} className="w-full sm:w-auto bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200">
-                            Laporkan Sekarang <ArrowRight size={20} />
-                        </Link>
-                        <Link href={route('login')} className="w-full sm:w-auto border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition">
-                            Lihat Peta
-                        </Link>
+                        {auth.user ? (
+                            <Link 
+                                href={route('beranda')} 
+                                className="bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200"
+                            >
+                                Masuk ke Aplikasi <ArrowRight size={20} />
+                            </Link>
+                        ) : (
+                            <>
+                                <Link 
+                                    href={route('laporan.create')} 
+                                    className="bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200"
+                                >
+                                    Laporkan Sekarang <ArrowRight size={20} />
+                                </Link>
+                                <Link 
+                                    href={route('peta.index')} 
+                                    className="border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-gray-50 transition"
+                                >
+                                    Lihat Peta
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
 
