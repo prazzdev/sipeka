@@ -1,0 +1,4 @@
+====
+Apakah Anda ingin saya buatkan dokumen Daftar Kebutuhan Perangkat Lunak & Keras (SRS) sederhana untuk disertakan di Bab 3 skripsi Anda? Atau mungkin Anda sudah siap untuk mulai menguji semua fiturnya?
+====
+

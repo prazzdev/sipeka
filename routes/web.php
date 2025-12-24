@@ -10,13 +10,11 @@ use Inertia\Inertia;
 use App\Http\RoleMiddleware;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('LandingPage', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('landing');
 
 
 // Route::get('/dashboard', function () {
