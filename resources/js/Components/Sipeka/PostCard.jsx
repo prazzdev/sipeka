@@ -21,7 +21,7 @@ export default function PostCard({ report }) {
                     </div>
                     <div>
                         <h4 className="font-bold text-sm text-gray-900">{report.user.name}</h4>
-                        <p className="text-xs text-gray-500">{new Date(report.created_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-500">{new Date(report.created_at).toLocaleDateString('ID','id')}</p>
                     </div>
                 </div>
                 {/* <Link 
@@ -33,21 +33,23 @@ export default function PostCard({ report }) {
             </div>
 
             {/* Foto Jalan */}
-            <div className="relative aspect-video bg-gray-100">
-                <img 
-                    src={`/storage/${report.foto_jalan}`} 
-                    alt="Kerusakan Jalan" 
-                    className="w-full h-full object-cover"
-                />
-                {/* Status Badge */}
-                <div className="absolute top-3 right-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm ${
-                        report.status === 'selesai' ? 'bg-green-500 text-white' : 'bg-yellow-400 text-blue-900'
-                    }`}>
-                        {report.status}
-                    </span>
+            <Link href={route('laporan.show', report?.id)}>
+                <div className="relative aspect-video bg-gray-100">
+                    <img 
+                        src={`/storage/${report.foto_jalan}`} 
+                        alt="Kerusakan Jalan" 
+                        className="w-full h-full object-cover"
+                    />
+                    {/* Status Badge */}
+                    <div className="absolute top-3 right-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm ${
+                            report.status === 'selesai' ? 'bg-green-500 text-white' : 'bg-yellow-400 text-blue-900'
+                        }`}>
+                            {report.status}
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </Link>
 
             {/* Content */}
             <div className="p-4">

@@ -1,12 +1,11 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ChevronLeft, MapPin, Calendar, User, ArrowBigUp, ExternalLink } from 'lucide-react';
+import { Head, Link, useForm,usePage } from '@inertiajs/react';
+import { ChevronLeft, MapPin, Calendar, User, ArrowBigUp, ExternalLink, Camera } from 'lucide-react';
 import MiniMap from '@/Components/Sipeka/MiniMap';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix icon manual agar tidak error/hilang
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
@@ -19,15 +18,33 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function DetailReport({ auth, report }) {
-    const { data, setData, post, processing, reset } = useForm({ pesan: '' });
+    const { flash } = usePage().props;
+    const { data, setData, post, processing, reset } = useForm({ 
+        pesan: '',
+        foto_tanggapan: null
+     });
     const position = [report.latitude, report.longitude];
+    const [previewImage, setPreviewImage] = React.useState(null);
 
     const submitComment = (e) => {
         e.preventDefault();
         post(route('komentar.store', report.id), {
-            onSuccess: () => reset('pesan'),
+            onSuccess: () => {
+                reset('pesan', 'foto_tanggapan');
+                setPreviewImage(null);
+                document.getElementById('foto_tanggapan').value = "";
+            },
             preserveScroll: true
         });
+    };
+    
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setData('foto_tanggapan', file);
+        
+        if (file) {
+            setPreviewImage(URL.createObjectURL(file)); // Buat URL sementara untuk preview
+        }
     };
     
     return (
@@ -130,6 +147,12 @@ export default function DetailReport({ auth, report }) {
                         </div>
                     </div>
 
+                    {flash?.message && (
+                        <div className="bg-green-100 mb-4 px-4 py-3 border border-green-400 rounded-xl font-bold text-green-700 text-sm animate-fade-in-down">
+                            {flash?.message}
+                        </div>
+                    )}
+                    
                     {/* Bagian Komentar/Admin Response */}
                         <h3 className="flex items-center mb-4 font-bold text-blue-900">
                         Tanggapan Dinas PUPR ({report.comments.length})
@@ -150,6 +173,18 @@ export default function DetailReport({ auth, report }) {
                                     <span className="text-[10px] text-gray-400">{new Date(comment.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <p className="text-gray-700 text-sm">{comment.pesan}</p>
+
+                                {/* Tampilkan foto jika admin melampirkan foto */}
+                                {comment.foto_tanggapan && (
+                                    <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
+                                        <img 
+                                            src={`/storage/${comment.foto_tanggapan}`} 
+                                            alt="Foto Progres" 
+                                            className="hover:opacity-90 w-full max-h-60 object-cover cursor-pointer"
+                                            onClick={() => window.open(`/storage/${comment.foto_tanggapan}`, '_blank')}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -164,6 +199,49 @@ export default function DetailReport({ auth, report }) {
                                 value={data.pesan}
                                 onChange={e => setData('pesan', e.target.value)}
                             ></textarea>
+                            
+                            <div className="mt-4">
+                                <label className="block mb-2 font-bold text-gray-700 text-xs uppercase">
+                                    Sertakan Foto Progres (Opsional)
+                                </label>
+                                
+                                <div className="relative">
+                                    <input 
+                                        type="file" 
+                                        id="foto_tanggapan"
+                                        className="hidden" // Sembunyikan input asli
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
+                                    
+                                    <label 
+                                        htmlFor="foto_tanggapan"
+                                        className="group flex flex-col justify-center items-center bg-gray-50 hover:bg-yellow-50 border-2 border-gray-300 hover:border-yellow-400 border-dashed rounded-xl w-full h-32 transition cursor-pointer"
+                                    >
+                                        {previewImage ? (
+                                            <div className="relative p-2 w-full h-full">
+                                                <img 
+                                                    src={previewImage} 
+                                                    className="rounded-lg w-full h-full object-cover" 
+                                                    alt="Preview" 
+                                                />
+                                                <div className="absolute inset-0 flex justify-center items-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-lg font-bold text-white text-xs transition">
+                                                    Ganti Foto
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col justify-center items-center pt-5 pb-6">
+                                                <Camera className="mb-2 w-8 h-8 text-gray-400 group-hover:text-yellow-500 transition" />
+                                                <p className="font-medium text-gray-500 text-xs">
+                                                    <span className="font-bold text-blue-900">Klik untuk upload</span> atau drag and drop
+                                                </p>
+                                                <p className="mt-1 text-[10px] text-gray-400 uppercase">PNG, JPG (Max 2MB)</p>
+                                            </div>
+                                        )}
+                                    </label>
+                                </div>
+                            </div>
+
                             <button 
                                 disabled={processing}
                                 className="bg-blue-900 hover:bg-blue-800 mt-2 px-6 py-2 rounded-lg font-bold text-white text-sm transition"
