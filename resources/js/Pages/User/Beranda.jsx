@@ -29,15 +29,32 @@ export default function Beranda({ auth, reports }) {
                     </div>
 
                     {/* List Postingan */}
-                    {reports.length > 0 ? (
-                        reports.map((report) => (
-                            <PostCard key={report.id} report={report} auth={auth} />
-                        ))
-                    ) : (
-                        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                            <p className="text-gray-500">Belum ada laporan di wilayah Madukara.</p>
-                        </div>
-                    )}
+                    <div className="space-y-6">
+                        {reports.data.length > 0 ? (
+                            reports.data.map((report) => (
+                                <PostCard key={report.id} report={report} auth={auth} />
+                            ))
+                        ) : (
+                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed">
+                                <p className="text-gray-500 font-medium">Belum ada laporan saat ini.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* <div className="mt-8 flex justify-center gap-1">
+                        {reports.links.map((link, k) => (
+                            <Link
+                                key={k}
+                                href={link?.url}
+                                className={`px-4 py-2 text-sm rounded-lg transition-all ${
+                                    link?.active 
+                                        ? 'bg-blue-900 text-white font-bold' 
+                                        : 'bg-white text-gray-600 hover:bg-gray-100 border'
+                                } ${!link.url ? 'hidden' : ''}`}
+                                dangerouslySetInnerHTML={{ __html: link?.label }}
+                            />
+                        ))}
+                    </div> */}
                 </div>
             </div>
         </AuthenticatedLayout>

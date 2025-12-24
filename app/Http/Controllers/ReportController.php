@@ -10,18 +10,20 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
-    // Menampilkan halaman Beranda (Feed)
-    public function index()
+    public function index(Request $request) 
     {
         $reports = Report::with('user')
             ->withExists(['upvotes as upvoted' => function($query) {
                 $query->where('user_id', auth()->id());
             }])
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('User/Beranda', [
-            'reports' => $reports
+            'reports' => $reports,
+            // Sekarang $request sudah aman digunakan
+            'filters' => $request->only(['status']) 
         ]);
     }
     // Menyimpan laporan baru ke database
@@ -98,7 +100,7 @@ class ReportController extends Controller
             $query->latest(); // Default: Tanggal terbaru
         }
 
-        $reports = $query->get();
+        $reports = $query->paginate(10)->withQueryString();
         
         $stats = [
             'total' => Report::count(),
