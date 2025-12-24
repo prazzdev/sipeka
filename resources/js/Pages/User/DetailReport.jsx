@@ -1,7 +1,7 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm,usePage } from '@inertiajs/react';
-import { ChevronLeft, MapPin, Calendar, User, ArrowBigUp, ExternalLink, Camera } from 'lucide-react';
+import { Head, Link, router, useForm,usePage } from '@inertiajs/react';
+import { ChevronLeft, MapPin, Calendar, User, ArrowBigUp, ExternalLink, Camera, Trash2 } from 'lucide-react';
 import MiniMap from '@/Components/Sipeka/MiniMap';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -170,7 +170,28 @@ export default function DetailReport({ auth, report }) {
                                         {comment.user.name} 
                                         {comment.user.role !== 'user' && <span className="bg-blue-100 ml-2 px-2 py-0.5 rounded text-[10px] text-blue-600">Official</span>}
                                     </span>
-                                    <span className="text-[10px] text-gray-400">{new Date(comment.created_at).toLocaleDateString()}</span>
+                                    <div className="flex items-center space-x-2">
+                                        <span className="font-medium text-[10px] text-gray-400">
+                                            {new Date(comment.created_at).toLocaleDateString('id-ID')} • {new Date(comment.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                                        </span>
+                                        
+                                        {/* TOMBOL HAPUS (Hanya muncul untuk Admin atau pemilik komentar) */}
+                                        {(auth.user.id === comment.user_id || auth.user.role === 'admin') && (
+                                            <button
+                                                onClick={() => {
+                                                    if(confirm('Hapus tanggapan ini?')) {
+                                                        router.delete(route('komentar.destroy', comment.id), {
+                                                            preserveScroll: true
+                                                        });
+                                                    }
+                                                }}
+                                                className="opacity-100 p-1 text-red-400 hover:text-red-600 transition"
+                                                title="Hapus Tanggapan"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 <p className="text-gray-700 text-sm">{comment.pesan}</p>
 

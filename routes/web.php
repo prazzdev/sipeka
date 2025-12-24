@@ -48,6 +48,8 @@ Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
 
     // Komentar pada Laporan
     Route::post('/laporan/{report}/komentar', [CommentController::class, 'store'])->name('komentar.store');
+
+    Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('komentar.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

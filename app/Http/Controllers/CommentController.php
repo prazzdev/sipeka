@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Report;
 use App\Models\Comment;
 
@@ -28,5 +29,22 @@ class CommentController extends Controller
         ]);
 
         return redirect()->back()->with('message', 'Tanggapan resmi telah dikirim.');
+    }
+
+    public function destroy(Comment $comment)
+    {
+        // Pastikan hanya admin/pemilik komentar yang bisa menghapus
+        if (auth()->id() !== $comment->user_id && auth()->user()->role !== 'admin') {
+            abort(403);
+        }
+
+        // Hapus file gambar dari storage jika ada
+        if ($comment->foto_tanggapan) {
+            Storage::disk('public')->delete($comment->foto_tanggapan);
+        }
+
+        $comment->delete();
+
+        return redirect()->back()->with('message', 'Tanggapan telah dihapus.');
     }
 }
