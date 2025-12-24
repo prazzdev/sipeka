@@ -24,15 +24,23 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                {/* <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink> */}
+                                <NavLink href={route('beranda')} active={route().current('beranda')}>
+                                    Beranda
+                                </NavLink>
+                                <NavLink href={route('peta.index')} active={route().current('peta.index')}>
+                                    Peta Kerusakan
+                                </NavLink>
+                                <NavLink href={route('laporan.create')} active={route().current('laporan.create')}>
+                                    Buat Laporan
+                                </NavLink>
+
                                 {(user?.role === 'admin' || user?.role === 'kadis') && (
-                                    <NavLink href={route('beranda')} active={route().current('beranda')}>
-                                        Beranda
+                                    <NavLink 
+                                        href={route('admin.dashboard')} 
+                                        active={route().current('admin.dashboard')}
+                                        className="text-red-600 font-bold"
+                                    >
+                                        Dashboard Admin
                                     </NavLink>
                                 )}
                             </div>
@@ -137,7 +145,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             href={route('dashboard')}
                             active={route().current('dashboard')}
                         >
-                            Dashboard
+                            Beranda
                         </ResponsiveNavLink>
                     </div>
 
@@ -152,7 +160,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
+                            <ResponsiveNavLink href={route('profile.edit')} active={route().current('profile.edit')}>
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
@@ -162,6 +170,22 @@ export default function AuthenticatedLayout({ header, children }) {
                             >
                                 Log Out
                             </ResponsiveNavLink>
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-2 pb-3 space-y-1">
+                            <ResponsiveNavLink href={route('peta.index')} active={route().current('peta.index')}>
+                                Peta Kerusakan
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink href={route('laporan.create')} active={route().current('laporan.create')}>
+                                Buat Laporan
+                            </ResponsiveNavLink>
+                            
+                            {/* Mobile Admin Link */}
+                            {(user?.role === 'admin' || user?.role === 'kadis') && (
+                                <ResponsiveNavLink href={route('admin.dashboard')} active={route().current('admin.dashboard')}>
+                                    Dashboard Admin
+                                </ResponsiveNavLink>
+                            )}
                         </div>
                     </div>
                 </div>
