@@ -59,11 +59,14 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                         </span>
                         <span className="text-sm font-bold text-blue-900 uppercase tracking-widest">Kecamatan Madukara</span>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
+                    {/* <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
                         Suarakan Kerusakan, <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">Wujudkan</span> Jalan Mulus.
+                    </h1> */}
+                    <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
+                        Sistem Informasi Pelaporan <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">Kerusakan Jalan</span>.
                     </h1>
                     <p className="text-xl text-gray-500 leading-relaxed max-w-lg">
-                        SIPEKA hadir untuk mempercepat pelaporan kerusakan jalan secara transparan berbasis GIS. Bantu Dinas PUPR memetakan prioritas perbaikan dengan satu genggaman.
+                        SIPEKA hadir untuk mempercepat pelaporan kerusakan jalan di Kecamatan Madukara secara transparan berbasis GIS. Bantu Dinas PUPR memetakan prioritas perbaikan dengan satu genggaman.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         {auth.user ? (
