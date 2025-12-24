@@ -41,20 +41,34 @@ export default function Beranda({ auth, reports }) {
                         )}
                     </div>
 
-                    {/* <div className="mt-8 flex justify-center gap-1">
-                        {reports.links.map((link, k) => (
-                            <Link
-                                key={k}
-                                href={link?.url}
-                                className={`px-4 py-2 text-sm rounded-lg transition-all ${
-                                    link?.active 
-                                        ? 'bg-blue-900 text-white font-bold' 
-                                        : 'bg-white text-gray-600 hover:bg-gray-100 border'
-                                } ${!link.url ? 'hidden' : ''}`}
-                                dangerouslySetInnerHTML={{ __html: link?.label }}
-                            />
+                    <div className="mt-6 flex flex-wrap justify-center items-center gap-1">
+                        {reports.links && reports.links.map((link, k) => (
+                            link.url === null ? (
+                                // Gunakan span jika URL null agar tidak error .toString()
+                                <span
+                                    key={k}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    className="px-4 py-2 text-sm rounded-lg border border-gray-100 text-gray-300 cursor-not-allowed"
+                                />
+                            ) : (
+                                // Gunakan Link hanya jika URL tersedia
+                                <Link
+                                    key={k}
+                                    href={link.url}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    className={`px-4 py-2 text-sm rounded-lg border transition-all ${
+                                        link.active 
+                                            ? 'bg-blue-900 text-white border-blue-900 font-bold shadow-sm' 
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-blue-900 hover:text-blue-900'
+                                    }`}
+                                    preserveScroll // Sangat disarankan agar posisi scroll tidak lompat
+                                />
+                            )
                         ))}
-                    </div> */}
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-4">
+                        Menampilkan {reports.from} sampai {reports.to} dari total {reports.total} laporan.
+                    </p>
                 </div>
             </div>
         </AuthenticatedLayout>
