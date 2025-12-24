@@ -6,7 +6,7 @@ export default function PostCard({ report }) {
     const { post, processing } = useForm();
 
     const handleUpvote = () => {
-        post(route('upvote.toggle', report.id), {
+        post(route('upvote.toggle', report?.id), {
             preserveScroll: true, // Agar saat klik, posisi scroll tidak lompat ke atas
         });
     };
@@ -24,7 +24,12 @@ export default function PostCard({ report }) {
                         <p className="text-xs text-gray-500">{new Date(report.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
-                <button className="text-gray-500"><MoreVertical size={20} /></button>
+                {/* <Link 
+                    href={route('laporan.show', report.id)}
+                    className="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100"
+                > */}
+                    <button className="text-gray-500"><MoreVertical size={20} /></button>
+                {/* </Link> */}
             </div>
 
             {/* Foto Jalan */}
@@ -47,7 +52,7 @@ export default function PostCard({ report }) {
             {/* Content */}
             <div className="p-4">
                 {/* <h3 className="font-bold text-lg text-blue-900 mb-1">{report.judul_laporan}</h3> */}
-                <Link href={route('laporan.show', report.id)}>
+                <Link href={route('laporan.show', report?.id)}>
                     <h3 className="font-bold text-lg text-blue-900 mb-1 hover:underline cursor-pointer">
                         {report.judul_laporan}
                     </h3>

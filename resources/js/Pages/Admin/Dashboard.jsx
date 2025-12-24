@@ -1,7 +1,7 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, router } from '@inertiajs/react';
-import { CheckCircle, Clock, AlertCircle, HardHat } from 'lucide-react';
+import { Head, useForm, router, Link } from '@inertiajs/react';
+import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink } from 'lucide-react';
 
 export default function Dashboard({ auth, reports, stats, filters = {} }) {
     const { patch } = useForm();
@@ -40,7 +40,7 @@ export default function Dashboard({ auth, reports, stats, filters = {} }) {
 
                     {/* Filter & Sort Bar */}
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-3">
                             <label className="text-sm font-bold text-gray-600">Filter Status:</label>
                             <select 
                                 value={filters.status || ''} 
@@ -94,7 +94,18 @@ export default function Dashboard({ auth, reports, stats, filters = {} }) {
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="text-xs text-gray-500">{report.lokasi_detail}</div>
+                                            {/* <div className="text-xs text-gray-500">{report.lokasi_detail}</div> */}
+                                            <div className="text-sm text-gray-900 flex items-center group">
+                                                {report.lokasi_detail}
+                                                <a 
+                                                    href={`https://www.google.com/maps?q=${report.latitude},${report.longitude}`}
+                                                    target="_blank"
+                                                    className="ml-2 opacity-100 transition text-blue-500"
+                                                    title="Buka di Google Maps"
+                                                >
+                                                    <ExternalLink size={14} />
+                                                </a>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-[10px] font-bold rounded-full uppercase ${getStatusStyle(report.status)}`}>
@@ -102,7 +113,7 @@ export default function Dashboard({ auth, reports, stats, filters = {} }) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <select 
+                                            {/* <select 
                                                 className="text-xs border-gray-300 rounded-lg focus:ring-yellow-500"
                                                 value={report.status}
                                                 onChange={(e) => handleStatusChange(report.id, e.target.value)}
@@ -111,7 +122,30 @@ export default function Dashboard({ auth, reports, stats, filters = {} }) {
                                                 <option value="diverifikasi">Verifikasi</option>
                                                 <option value="diproses">Proses Jalan</option>
                                                 <option value="selesai">Selesai</option>
-                                            </select>
+                                            </select> */}
+                                            <div className="flex items-center justify-center space-x-3">
+                                                {/* TOMBOL LIHAT DETAIL */}
+                                                <Link 
+                                                    href={route('laporan.show', report.id)} 
+                                                    className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition"
+                                                    title="Lihat Detail Laporan"
+                                                    target='_blank'
+                                                >
+                                                    <Eye size={18} />
+                                                </Link>
+
+                                                {/* SELECT STATUS YANG SUDAH KITA BUAT SEBELUMNYA */}
+                                                <select 
+                                                    className="text-xs border-gray-300 rounded-lg focus:ring-yellow-500 py-1"
+                                                    value={report.status}
+                                                    onChange={(e) => handleStatusChange(report.id, e.target.value)}
+                                                >
+                                                    <option value="menunggu">Menunggu</option>
+                                                    <option value="diverifikasi">Verifikasi</option>
+                                                    <option value="diproses">Diproses</option>
+                                                    <option value="selesai">Selesai</option>
+                                                </select>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
