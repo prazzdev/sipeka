@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Admin SIPEKA',
             'email' => 'admin@sipeka.com',
-            'password' => Hash::make('password'),
+            'password' => bcrypt('password'), 
             'role' => 'admin',
         ]);
 
@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Kepala Dinas PUPR',
             'email' => 'kadis@sipeka.com',
-            'password' => Hash::make('password'),
+            'password' => bcrypt('password'), 
             'role' => 'kadis',
         ]);
 
@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Bambang Madukara',
             'email' => 'user@sipeka.com',
-            'password' => Hash::make('password'),
+            'password' => bcrypt('password'), 
             'role' => 'user',
         ]);
     }

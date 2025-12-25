@@ -113,11 +113,19 @@ export default function PostCard({ report, auth }) {
 
             <Link href={route('laporan.show', report?.id)}>
                 <div className="relative aspect-video bg-gray-100">
-                    <img 
-                        src={`/storage/${report.foto_jalan}`} 
-                        alt="Kerusakan Jalan" 
+                    {report.foto_jalan !== null ? (
+                        <img 
+                            src={`/storage/${report.foto_jalan}`} 
+                            alt="Kerusakan Jalan" 
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <img 
+                        src={`/storage/no-image.png`} 
+                        alt="Gambar tidak tersedia untuk laporan ini" 
                         className="w-full h-full object-cover"
                     />
+                    )}
                     {/* Status Badge */}
                     <div className="absolute top-3 right-3">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm ${

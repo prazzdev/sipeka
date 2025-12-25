@@ -19,7 +19,6 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function DetailReport({ auth, report }) {
-    console.log(report);
     const { flash } = usePage().props;
     const { data, setData, post, processing, reset } = useForm({ 
         pesan: '',
@@ -75,11 +74,19 @@ export default function DetailReport({ auth, report }) {
                             
                             {/* Sisi Kiri: Foto */}
                             <div className="bg-gray-100 h-64 md:h-auto">
-                                <img 
-                                    src={`/storage/${report.foto_jalan}`} 
-                                    alt={report.judul_laporan} 
-                                    className="w-full h-full object-cover"
-                                />
+                                {report.foto_jalan !== null ? (
+                                    <img 
+                                        src={`/storage/${report.foto_jalan}`} 
+                                        alt={report.judul_laporan} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ): (
+                                    <img 
+                                        src={`/storage/no-image.png`} 
+                                        alt={report.judul_laporan} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
                             </div>
 
                             {/* Sisi Kanan: Info Lengkap */}

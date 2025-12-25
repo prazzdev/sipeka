@@ -10,7 +10,8 @@ export default function Beranda({ auth, reports, filters }) {
     const handleSort = (type) => {
         router.get(route('beranda'), { sort: type }, { 
             preserveState: true, 
-            preserveScroll: true 
+            preserveScroll: true ,
+            replace: true
         });
     };
     

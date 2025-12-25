@@ -12,18 +12,17 @@ class ReportController extends Controller
 {
     public function index(Request $request) 
     {
-        $query = Report::with('user')
+        $query = Report::with(['user', 'comments']) // Pastikan load comments untuk timeline
             ->withExists(['upvotes as upvoted' => function($query) {
                 $query->where('user_id', auth()->id());
-            }])
-            ->latest();
+            }]);
 
         // Logika Filter Sorting
         if ($request->sort === 'populer') {
             // Urutkan berdasarkan total_upvote terbanyak
             $query->orderBy('total_upvote', 'desc');
         } else {
-            // Default: Terbaru
+            // Default: Terbaru (Gunakan latest() di sini saja)
             $query->latest();
         }
 

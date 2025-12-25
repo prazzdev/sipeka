@@ -21,13 +21,19 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    // database/factories/UserFactory.php
     public function definition(): array
     {
+        $firstName = ['Bambang', 'Slamet', 'Eko', 'Dwi', 'Tri', 'Agus', 'Wahyudi', 'Sugeng', 'Priyanto', 'Sutrisno', 'Budi', 'Joko', 'Purwanto', 'Heri', 'Nanang'];
+        $lastName = ['Susilo', 'Wicaksono', 'Kusuma', 'Prabowo', 'Santoso', 'Hidayat', 'Saputra', 'Nugroho', 'Wibowo'];
+
+        $name = fake()->randomElement($firstName) . ' ' . fake()->randomElement($lastName);
+        
         return [
-            'name' => fake()->name(),
+            'name' => $name,
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => bcrypt('password'), 
+            'role' => 'user',
             'remember_token' => Str::random(10),
         ];
     }
