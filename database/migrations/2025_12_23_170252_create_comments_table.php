@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('report_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained(); // Admin yang menanggapi
+            $table->foreignId('user_id')->constrained();
             $table->text('pesan');
+            $table->string('status')->nullable();
+            $table->string('foto_tanggapan')->nullable();
             $table->timestamps();
         });
     }

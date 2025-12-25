@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
             $table->enum('status', ['menunggu', 'diverifikasi', 'diproses', 'selesai', 'ditolak'])->default('menunggu');
+            $table->text('alasan_ditolak')->nullable();
             $table->integer('total_upvote')->default(0);
             $table->timestamps();
         });
