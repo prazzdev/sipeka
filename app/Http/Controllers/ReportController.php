@@ -126,11 +126,31 @@ class ReportController extends Controller
 
     public function updateStatus(Request $request, Report $report)
     {
-        $request->validate(['status' => 'required|in:menunggu,diverifikasi,diproses,selesai']);
-        
-        $report->update(['status' => $request->status]);
+        $request->validate([
+            'status' => 'required|in:menunggu,diverifikasi,diproses,selesai,ditolak',
+            'pesan' => 'required|string|min:5',
+            'foto_tanggapan' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-        return redirect()->back()->with('message', 'Status laporan berhasil diperbarui!');
+        $path = null;
+        if ($request->hasFile('foto_tanggapan')) {
+            $path = $request->file('foto_tanggapan')->store('tanggapan-admin', 'public');
+        }
+
+        $report->update([
+            'status' => $request->status
+        ]);
+
+        // dd($request->status);
+
+        $report->comments()->create([
+            'user_id' => auth()->id(),
+            'pesan' => $request->pesan,
+            'status' => $request->status,
+            'foto_tanggapan' => $path, 
+        ]);
+
+        return redirect()->back()->with('message', 'Progres laporan berhasil diperbarui!');
     }
 
     public function exportPdf(Request $request)

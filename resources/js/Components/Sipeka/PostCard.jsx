@@ -68,12 +68,6 @@ export default function PostCard({ report, auth }) {
                         <p className="text-xs text-gray-500">{new Date(report.created_at).toLocaleDateString('ID','id')}</p>
                     </div>
                 </div>
-                {/* <Link 
-                    href={route('laporan.show', report.id)}
-                    className="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100"
-                >
-                    <button className="text-gray-500"><MoreVertical size={20} /></button>
-                </Link> */}
                 <div className="relative">
                     <button 
                         onClick={() => setShowMenu(!showMenu)}
@@ -127,7 +121,11 @@ export default function PostCard({ report, auth }) {
                     {/* Status Badge */}
                     <div className="absolute top-3 right-3">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm ${
-                            report.status === 'selesai' ? 'bg-green-500 text-white' : 'bg-yellow-400 text-blue-900'
+                            report.status === 'selesai' ? 'bg-green-500 text-white' : 
+                            report.status === 'ditolak' ? 'bg-red-100 text-red-600' :
+                            report.status === 'diproses' ? 'bg-blue-500 text-white' :
+                            report.status === 'diverifikasi' ? 'bg-indigo-500 text-white' 
+                            : 'bg-yellow-400 text-blue-900'
                         }`}>
                             {report.status}
                         </span>

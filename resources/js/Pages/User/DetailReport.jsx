@@ -8,6 +8,7 @@ import L from 'leaflet';
 
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { comment } from 'postcss';
 
 let DefaultIcon = L.icon({
     iconUrl: markerIcon,
@@ -18,6 +19,7 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function DetailReport({ auth, report }) {
+    console.log(report);
     const { flash } = usePage().props;
     const { data, setData, post, processing, reset } = useForm({ 
         pesan: '',
@@ -166,7 +168,7 @@ export default function DetailReport({ auth, report }) {
                     </h3>
 
                     {/* List Komentar */}
-                    <div className="space-y-4 mb-6">
+                    {/* <div className="space-y-4 mb-6">
                         {report.comments.map((comment) => (
                             <div key={comment.id} className="bg-gray-50 p-4 border border-gray-100 rounded-xl">
                                 <div className="flex justify-between items-center mb-2">
@@ -182,7 +184,6 @@ export default function DetailReport({ auth, report }) {
                                             {new Date(comment.created_at).toLocaleDateString('id-ID')} • {new Date(comment.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
                                         </span>
                                         
-                                        {/* TOMBOL HAPUS (Hanya muncul untuk Admin atau pemilik komentar) */}
                                         {(auth.user.id === comment.user_id || auth.user.role === 'admin') && (
                                             <button
                                                 onClick={() => {
@@ -202,7 +203,6 @@ export default function DetailReport({ auth, report }) {
                                 </div>
                                 <p className="text-gray-700 text-sm">{comment.pesan}</p>
 
-                                {/* Tampilkan foto jika admin melampirkan foto */}
                                 {comment.foto_tanggapan && (
                                     <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
                                         <img 
@@ -215,9 +215,51 @@ export default function DetailReport({ auth, report }) {
                                 )}
                             </div>
                         ))}
+                    </div> */}
+                    <div className="space-y-4 mt-6 ml-2 pl-4 border-gray-100 border-l-2">
+                        <h4 className="mb-4 font-black text-gray-400 text-xs uppercase tracking-widest">Histori Progres</h4>
+                        
+                        {report?.comments?.map((comment, index) => {
+                            const dotColor = getStatusColor(comment?.status);
+                            
+                            return (
+                                <div key={comment.id} className="relative mb-8 last:mb-0 ml-3 pl-8 border-gray-100 border-l-2">
+                                    <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-white shadow-sm transition-colors duration-500 ${dotColor}`}></div>
+                                    
+                                    <div className={`bg-white p-4 rounded-2xl border transition-all shadow-sm hover:shadow-md ${
+                                        comment.pesan.includes('ditolak') ? 'border-red-100' : 
+                                        comment.pesan.includes('selesai') ? 'border-green-100' : 'border-gray-100'
+                                    }`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md ${
+                                                dotColor.replace('bg-', 'text-').replace('500', '700')
+                                            } ${dotColor.replace('500', '100')}`}>
+                                                {comment.status.split(']')[0].replace('[Status: ', '')}
+                                            </span>
+                                            <span className="font-medium text-[10px] text-gray-400">
+                                                {new Date(comment.created_at).toLocaleDateString('ID-id')} • {new Date(comment.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                                            </span>
+                                        </div>
+
+                                        <p className="mb-3 text-gray-600 text-sm leading-relaxed">
+                                            {comment.pesan.split(']')[1] || comment.pesan}
+                                        </p>
+                                        
+                                        {comment.foto_tanggapan && (
+                                            <div className="border border-gray-100 rounded-xl overflow-hidden">
+                                                <img 
+                                                    src={`/storage/${comment.foto_tanggapan}`} 
+                                                    alt="Bukti Progres"
+                                                    className="w-full h-40 object-cover hover:scale-105 transition-transform duration-500"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
 
-                    {/* Form Komentar (Hanya Admin/Kadis) */}
                     {(auth.user.role === 'admin' || auth.user.role === 'kadis') && (
                         <form onSubmit={submitComment} className="mt-4 pt-4 border-t">
                             <textarea
@@ -283,3 +325,13 @@ export default function DetailReport({ auth, report }) {
         </AuthenticatedLayout>
     );
 }
+
+const getStatusColor = (status) => {
+    console.log(status);
+    if (status.includes('ditolak')) return 'bg-red-500';
+    if (status.includes('selesai')) return 'bg-green-500';
+    if (status.includes('diproses')) return 'bg-orange-500'; // Oranye untuk proses
+    if (status.includes('diverifikasi')) return 'bg-blue-500';
+    if (status.includes('menunggu')) return 'bg-blue-500';
+    return 'bg-gray-400'; // Default
+};
