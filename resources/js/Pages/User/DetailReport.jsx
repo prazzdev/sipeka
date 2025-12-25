@@ -55,12 +55,12 @@ export default function DetailReport({ auth, report }) {
             user={auth.user}
             header={<h2 className="font-bold text-blue-900 text-xl leading-tight">Detail Laporan</h2>}
         >
-            <Head title={`Detail - ${report.judul_laporan}`} />
+            <Head title={`${report?.judul_laporan} - SIPEKA`} />
             <Head>
-                {/* <title>{report.judul_laporan}</title> */}
-                <meta property="og:title" content={report.judul_laporan} />
-                <meta property="og:description" content={report.lokasi_detail} />
-                <meta property="og:image" content={`/storage/${report.foto_jalan}`} />
+                {/* <title>{report?.judul_laporan} - SIPEKA</title> */}
+                <meta property="og:title" content={report?.judul_laporan} />
+                <meta property="og:description" content={report?.lokasi_detail} />
+                <meta property="og:image" content={`/storage/${report?.foto_jalan}`} />
             </Head>
 
             <div className="px-4 py-8">
@@ -216,15 +216,15 @@ export default function DetailReport({ auth, report }) {
                             </div>
                         ))}
                     </div> */}
-                    <div className="space-y-4 mt-6 ml-2 pl-4 border-gray-100 border-l-2">
-                        <h4 className="mb-4 font-black text-gray-400 text-xs uppercase tracking-widest">Histori Progres</h4>
+                    <div className="space-y-4 mt-6 ml-2 max-sm:-ml-1 pl-4 border-gray-100 border-l-2">
+                        <h4 className="mb-7 font-black text-gray-400 text-xs uppercase tracking-widest">Histori Progres</h4>
                         
                         {report?.comments?.map((comment, index) => {
                             const dotColor = getStatusColor(comment?.status);
                             
                             return (
-                                <div key={comment.id} className="relative mb-8 last:mb-0 ml-3 pl-8 border-gray-100 border-l-2">
-                                    <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-white shadow-sm transition-colors duration-500 ${dotColor}`}></div>
+                                <div key={comment.id} className="relative mb-8 last:mb-0 ml-3 max-sm:-ml-2 pl-8 max-sm:pl-4 border-gray-400 border-l-2">
+                                    <div className={`absolute -left-[9px] -top-4 w-4 h-4 rounded-full border-4 border-white shadow-sm transition-colors duration-500 ${dotColor}`}></div>
                                     
                                     <div className={`bg-white p-4 rounded-2xl border transition-all shadow-sm hover:shadow-md ${
                                         comment.pesan.includes('ditolak') ? 'border-red-100' : 
@@ -327,11 +327,10 @@ export default function DetailReport({ auth, report }) {
 }
 
 const getStatusColor = (status) => {
-    console.log(status);
     if (status.includes('ditolak')) return 'bg-red-500';
     if (status.includes('selesai')) return 'bg-green-500';
-    if (status.includes('diproses')) return 'bg-orange-500'; // Oranye untuk proses
+    if (status.includes('diproses')) return 'bg-orange-500'; 
     if (status.includes('diverifikasi')) return 'bg-blue-500';
     if (status.includes('menunggu')) return 'bg-blue-500';
-    return 'bg-gray-400'; // Default
+    return 'bg-gray-400'; 
 };
