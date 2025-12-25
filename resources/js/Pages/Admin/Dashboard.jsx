@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer, Edit2 } from 'lucide-react';
 import Modal from '@/Components/Modal';
 
 export default function Dashboard({ auth, reports, stats, filters}) {
@@ -36,7 +36,6 @@ export default function Dashboard({ auth, reports, stats, filters}) {
         }
     };
 
-    // Fungsi untuk handle perubahan filter/sort
     const handleFilterChange = (key, value) => {
         router.get(route('admin.dashboard'), 
             { ...filters, [key]: value }, 
@@ -251,32 +250,26 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                         <option value="diproses">Proses Jalan</option>
                                                         <option value="selesai">Selesai</option>
                                                     </select> */}
-                                                    <div className="flex items-center justify-center space-x-3">
-                                                        {/* TOMBOL LIHAT DETAIL */}
+                                                    <div className="flex items-center justify-center space-x-2">
                                                         <Link 
                                                             href={route('laporan.show', report.id)} 
-                                                            className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition"
-                                                            title="Lihat Detail Laporan"
-                                                            target='_blank'
+                                                            className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                                                            title="Lihat Detail (Publik)"
                                                         >
                                                             <Eye size={18} />
                                                         </Link>
 
-                                                        {/* SELECT STATUS YANG SUDAH KITA BUAT SEBELUMNYA */}
-                                                        {/* <select 
-                                                            className="text-xs border-gray-300 rounded-lg focus:ring-yellow-500 py-1"
-                                                            value={report.status}
-                                                            onChange={(e) => handleStatusChange(report.id, e.target.value)}
+                                                        <Link 
+                                                            href={route('admin.report.manage', report.id)} 
+                                                            className="p-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200"
+                                                            title="Kelola Histori & Komentar"
                                                         >
-                                                            <option value="menunggu">Menunggu</option>
-                                                            <option value="diverifikasi">Verifikasi</option>
-                                                            <option value="diproses">Diproses</option>
-                                                            <option value="selesai">Selesai</option>
-                                                            <option value="ditolak">Ditolak</option>
-                                                        </select> */}
+                                                            <Edit2 size={18} />
+                                                        </Link>
+                                                        
                                                         <button
-                                                            onClick={() => openModal(report)} // Memanggil fungsi openModal dengan data laporan terkait
-                                                            className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold hover:bg-blue-200 transition"
+                                                            onClick={() => openModal(report)}
+                                                            className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-800 transition text-sm"
                                                         >
                                                             Tanggapi
                                                         </button>

@@ -178,6 +178,16 @@ class ReportController extends Controller
         return $pdf->download('laporan-sipeka-' . date('Y-m-d') . '.pdf');
     }
 
+    public function manage(Report $report)
+    {
+        // Load komentar beserta user admin yang membuatnya
+        $report->load(['comments.user', 'user']);
+        
+        return Inertia::render('Admin/Reports/Manage', [
+            'report' => $report
+        ]);
+    }
+
     public function destroy(Report $report)
     {
         // Proteksi: Hanya pemilik laporan atau admin yang boleh menghapus

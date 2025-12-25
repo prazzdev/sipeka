@@ -234,7 +234,7 @@ export default function DetailReport({ auth, report }) {
                                             <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md ${
                                                 dotColor.replace('bg-', 'text-').replace('500', '700')
                                             } ${dotColor.replace('500', '100')}`}>
-                                                {comment.status.split(']')[0].replace('[Status: ', '')}
+                                                {comment.status?.split(']')[0].replace('[Status: ', '')}
                                             </span>
                                             <span className="font-medium text-[10px] text-gray-400">
                                                 {new Date(comment.created_at).toLocaleDateString('ID-id')} • {new Date(comment.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
@@ -327,10 +327,10 @@ export default function DetailReport({ auth, report }) {
 }
 
 const getStatusColor = (status) => {
-    if (status.includes('ditolak')) return 'bg-red-500';
-    if (status.includes('selesai')) return 'bg-green-500';
-    if (status.includes('diproses')) return 'bg-orange-500'; 
-    if (status.includes('diverifikasi')) return 'bg-blue-500';
-    if (status.includes('menunggu')) return 'bg-blue-500';
+    if (status?.includes('ditolak')) return 'bg-red-500';
+    if (status?.includes('selesai')) return 'bg-green-500';
+    if (status?.includes('diproses')) return 'bg-orange-500'; 
+    if (status?.includes('diverifikasi')) return 'bg-blue-500';
+    if (status?.includes('menunggu')) return 'bg-blue-500';
     return 'bg-gray-400'; 
 };

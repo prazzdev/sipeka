@@ -52,6 +52,15 @@ Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
     Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('komentar.destroy');
 });
 
+Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
+    // Halaman kelola detail & komentar
+    Route::get('/admin/laporan/{report}/manage', [ReportController::class, 'manage'])->name('admin.report.manage');
+    
+    // Action Edit & Hapus Komentar
+    Route::patch('/admin/comment/{comment}', [CommentController::class, 'update'])->name('admin.comment.update');
+    Route::delete('/admin/comment/{comment}', [CommentController::class, 'destroy'])->name('admin.comment.destroy');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Beranda SIPEKA
     Route::get('/beranda', [ReportController::class, 'index'])->name('beranda');

@@ -31,20 +31,53 @@ class CommentController extends Controller
         return redirect()->back()->with('message', 'Tanggapan resmi telah dikirim.');
     }
 
-    public function destroy(Comment $comment)
+    public function update(Request $request, Comment $comment)
     {
-        // Pastikan hanya admin/pemilik komentar yang bisa menghapus
-        if (auth()->id() !== $comment->user_id && auth()->user()->role !== 'admin') {
-            abort(403);
+        $request->validate([
+            'pesan' => 'required|string|min:5',
+            'foto_tanggapan' => 'nullable|image|max:2048'
+        ]);
+
+        // Jika ada foto baru yang diunggah
+        if ($request->hasFile('foto_tanggapan')) {
+            // Hapus foto lama agar storage tidak penuh
+            if ($comment->foto_tanggapan) {
+                Storage::disk('public')->delete($comment->foto_tanggapan);
+            }
+            // Simpan foto baru
+            $path = $request->file('foto_tanggapan')->store('tanggapan-admin', 'public');
+            $comment->foto_tanggapan = $path;
         }
 
-        // Hapus file gambar dari storage jika ada
+        $comment->pesan = $request->pesan;
+        $comment->save();
+
+        return back()->with('message', 'Tanggapan berhasil diperbarui.');
+    }
+
+    public function destroy(Comment $comment)
+    {
+        // 1. Keamanan (Sudah benar)
+        if (auth()->id() !== $comment->user_id && auth()->user()->role !== 'admin') {
+            abort(403, 'Anda tidak memiliki akses untuk menghapus ini.');
+        }
+
+        // 2. Hapus file gambar dari storage (Sudah benar)
         if ($comment->foto_tanggapan) {
             Storage::disk('public')->delete($comment->foto_tanggapan);
         }
 
+        // 3. Simpan report_id sebelum dihapus untuk keperluan sinkronisasi (Opsional/Saran)
+        $reportId = $comment->report_id;
+
+        // 4. Hapus Komentar
         $comment->delete();
 
-        return redirect()->back()->with('message', 'Tanggapan telah dihapus.');
+        /* TIPS SKRIPSI: 
+        Idealnya, setelah komentar dihapus, kita bisa mengecek histori terakhir 
+        agar status di tabel 'reports' tetap akurat. 
+        */
+
+        return redirect()->back()->with('message', 'Tanggapan dan bukti foto berhasil dihapus.');
     }
 }
