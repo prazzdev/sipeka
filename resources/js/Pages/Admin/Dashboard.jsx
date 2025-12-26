@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer, Edit2 } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer, Edit2, Search } from 'lucide-react';
 import Modal from '@/Components/Modal';
+import { getStatusStyle } from '@/Helpers/getStatusStyle';
+import { StatCard } from '@/Components/Fragments/StatCard';
 
 export default function Dashboard({ auth, reports, stats, filters}) {
     const { data, setData, post, processing, reset, errors, patch } = useForm({
@@ -28,12 +30,6 @@ export default function Dashboard({ auth, reports, stats, filters}) {
         setIsModalOpen(false);
         setSelectedReport(null);
         reset(); 
-    };
-
-    const handleStatusChange = (id, newStatus) => {
-        if(confirm(`Ubah status laporan menjadi ${newStatus}?`)) {
-            patch(route('admin.status.update', { report: id, status: newStatus }));
-        }
     };
 
     const handleFilterChange = (key, value) => {
@@ -148,42 +144,77 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                         <StatCard title="Diproses" value={stats.proses} icon={<HardHat className="text-orange-600"/>} color="bg-orange-50" />
                         <StatCard title="Selesai" value={stats.selesai} icon={<CheckCircle className="text-green-600"/>} color="bg-green-50" />
                     </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div className="bg-white p-5 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between group hover:border-blue-400 transition">
+                            <div>
+                                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Laporan Hari Ini</p>
+                                <p className="text-3xl font-black text-blue-900">{stats.hari_ini}</p>
+                            </div>
+                            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition">
+                                <Clock size={24} />
+                            </div>
+                        </div>
+                        <div className="bg-white p-5 rounded-xl border border-green-100 shadow-sm flex items-center justify-between group hover:border-green-400 transition">
+                            <div>
+                                <p className="text-[10px] font-black text-green-400 uppercase tracking-[0.2em]">Laporan Bulan Ini</p>
+                                <p className="text-3xl font-black text-blue-900">{stats.bulan_ini}</p>
+                            </div>
+                            <div className="p-3 bg-green-50 text-green-600 rounded-2xl group-hover:scale-110 transition">
+                                <CheckCircle size={24} />
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Filter & Sort Bar */}
-                    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <div className="flex items-center space-x-3">
-                            <label className="text-sm font-bold text-gray-600">Filter Status:</label>
-                            <select 
-                                value={filters.status || ''} 
-                                onChange={(e) => handleFilterChange('status', e.target.value)}
-                                className="rounded-lg border-gray-300 text-sm focus:ring-yellow-500"
-                            >
-                                <option value="">Semua Laporan</option>
-                                <option value="menunggu">Menunggu</option>
-                                <option value="diproses">Diproses</option>
-                                <option value="selesai">Selesai</option>
-                            </select>
-                            <div className="flex gap-2">
-                                <a 
-                                    href={route('admin.export', { status: filters.status })} 
-                                    className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-sm"
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-col lg:flex-row justify-between items-center gap-4">
+                        <div className="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto">
+                            {/* Input Search */}
+                            <div className="relative w-full md:w-80">
+                                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                                <input 
+                                    type="text"
+                                    placeholder="Cari No. Laporan / Judul / Nama Pelapor..."
+                                    defaultValue={filters.search}
+                                    onBlur={(e) => handleFilterChange('search', e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleFilterChange('search', e.target.value)}
+                                    className="pl-10 w-full rounded-xl border-gray-200 text-sm focus:ring-blue-900 focus:border-blue-900 transition"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2 w-full md:w-auto">
+                                <label className="text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Status:</label>
+                                <select 
+                                    value={filters.status || ''} 
+                                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                                    className="w-full md:w-auto rounded-lg border-gray-200 text-sm focus:ring-blue-900 font-bold text-blue-900"
                                 >
-                                    <Printer size={16} className="mr-2" />
-                                    Cetak PDF
-                                </a>
+                                    <option value="">Semua</option>
+                                    <option value="menunggu">Menunggu</option>
+                                    <option value="diverifikasi">Diverifikasi</option>
+                                    <option value="diproses">Diproses</option>
+                                    <option value="selesai">Selesai</option>
+                                    <option value="ditolak">Ditolak</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-2">
-                            <label className="text-sm font-bold text-gray-600">Urutkan:</label>
+                        <div className="flex items-center gap-3 w-full lg:w-auto justify-end">
                             <select 
                                 value={filters.sort || 'latest'} 
                                 onChange={(e) => handleFilterChange('sort', e.target.value)}
-                                className="rounded-lg border-gray-300 text-sm focus:ring-yellow-500 font-bold text-blue-900"
+                                className="rounded-lg border-gray-200 text-sm focus:ring-blue-900 font-bold text-blue-900"
                             >
                                 <option value="latest">Terbaru</option>
-                                <option value="upvote">🔥 Upvote Terbanyak (Prioritas)</option>
+                                <option value="upvote">Terpopuler</option>
                             </select>
+
+                            <a 
+                                href={route('admin.export', filters)} 
+                                className="flex items-center bg-green-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition shadow-lg shadow-green-100"
+                            >
+                                <Printer size={16} className="mr-2" />
+                                Export PDF
+                            </a>
                         </div>
                     </div>
 
@@ -317,27 +348,4 @@ export default function Dashboard({ auth, reports, stats, filters}) {
             </div>
         </AuthenticatedLayout>
     );
-}
-
-// Sub-komponen Card Statistik
-function StatCard({ title, value, icon, color }) {
-    return (
-        <div className={`${color} p-6 rounded-xl border border-gray-100 shadow-sm flex items-center space-x-4`}>
-            <div className="p-3 bg-white rounded-lg shadow-inner">{icon}</div>
-            <div>
-                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{title}</p>
-                <p className="text-2xl font-black text-gray-900">{value}</p>
-            </div>
-        </div>
-    );
-}
-
-// Helper warna status
-function getStatusStyle(status) {
-    switch(status) {
-        case 'selesai': return 'bg-green-100 text-green-700';
-        case 'diproses': return 'bg-orange-100 text-orange-700';
-        case 'menunggu': return 'bg-yellow-100 text-yellow-700';
-        default: return 'bg-gray-100 text-gray-700';
-    }
 }

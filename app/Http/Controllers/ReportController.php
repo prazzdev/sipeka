@@ -126,37 +126,53 @@ class ReportController extends Controller
     // Halaman Dashboard Admin/Kadis
     public function adminDashboard(Request $request)
     {
-        // Ambil parameter dari request (query string)
+        // Ambil parameter dari request
         $statusFilter = $request->query('status');
-        $sortBy = $request->query('sort', 'latest'); // Default: terbaru
+        $sortBy = $request->query('sort', 'latest');
+        $search = $request->query('search'); // Tambahkan parameter search
 
         $query = Report::with('user');
 
-        // Fitur Filter Status
+        // 1. Fitur Search (Nomor Laporan, Judul, atau Nama Pelapor)
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_laporan', 'like', "%{$search}%")
+                ->orWhere('judul_laporan', 'like', "%{$search}%")
+                ->orWhereHas('user', function($u) use ($search) {
+                    $u->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // 2. Fitur Filter Status
         if ($statusFilter) {
             $query->where('status', $statusFilter);
         }
 
-        // Fitur Sorting
+        // 3. Fitur Sorting
         if ($sortBy === 'upvote') {
-            $query->orderBy('total_upvote', 'desc'); // Upvote terbanyak di atas
+            $query->orderBy('total_upvote', 'desc');
         } else {
-            $query->latest(); // Default: Tanggal terbaru
+            $query->latest();
         }
 
         $reports = $query->paginate(10)->withQueryString();
         
+        // 4. Statistik Lengkap
         $stats = [
             'total' => Report::count(),
             'pending' => Report::where('status', 'menunggu')->count(),
             'proses' => Report::where('status', 'diproses')->count(),
             'selesai' => Report::where('status', 'selesai')->count(),
+            'hari_ini' => Report::whereDate('created_at', now())->count(),
+            'bulan_ini' => Report::whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)->count(),
         ];
 
         return Inertia::render('Admin/Dashboard', [
             'reports' => $reports,
             'stats' => $stats,
-            'filters' => $request->only(['status', 'sort']) // Kirim balik status filter aktif
+            'filters' => $request->only(['status', 'sort', 'search']) // Tambahkan search ke filters
         ]);
     }
 
