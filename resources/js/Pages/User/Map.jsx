@@ -53,6 +53,7 @@ export default function MapPage({ auth, reports, filters }) {
 
     // Opsi Bulan & Tahun
     const months = [
+        { v: 'all', l: 'Semua Bulan' }, // Opsi baru
         { v: '01', l: 'Januari' }, { v: '02', l: 'Februari' }, { v: '03', l: 'Maret' },
         { v: '04', l: 'April' }, { v: '05', l: 'Mei' }, { v: '06', l: 'Juni' },
         { v: '07', l: 'Juli' }, { v: '08', l: 'Agustus' }, { v: '09', l: 'September' },
@@ -95,25 +96,29 @@ export default function MapPage({ auth, reports, filters }) {
                     <div className="flex flex-col md:flex-row justify-between items-end mb-4 px-2 gap-4">
                         <div className="flex gap-2 w-full md:w-auto">
                             <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-blue-900 ml-1">BULAN</label>
+                                <label className="text-[10px] font-bold text-blue-900 ml-1 uppercase">Bulan</label>
                                 <select 
                                     name="month" 
                                     value={filterData.month} 
                                     onChange={handleFilterChange}
-                                    className="border-gray-300 rounded-lg text-xs focus:ring-blue-500"
+                                    className="border-gray-300 rounded-lg text-xs focus:ring-blue-500 font-bold text-blue-900"
                                 >
-                                    {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+                                    {months.map(m => (
+                                        <option key={m.v} value={m.v}>{m.l}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-blue-900 ml-1">TAHUN</label>
+                                <label className="text-[10px] font-bold text-blue-900 ml-1 uppercase">Tahun</label>
                                 <select 
                                     name="year" 
                                     value={filterData.year} 
                                     onChange={handleFilterChange}
-                                    className="border-gray-300 rounded-lg text-xs focus:ring-blue-500"
+                                    className="border-gray-300 rounded-lg text-xs focus:ring-blue-500 font-bold text-blue-900"
                                 >
-                                    {[2023, 2024, 2025].map(y => <option key={y} value={y}>{y}</option>)}
+                                    {years.map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

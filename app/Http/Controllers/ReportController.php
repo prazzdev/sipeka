@@ -80,24 +80,26 @@ class ReportController extends Controller
 
     public function map(Request $request)
     {
-        // 1. Ambil input filter atau gunakan default (bulan dan tahun ini)
-        $selectedMonth = $request->month ?? date('m');
+        // Default tahun ini, dan bulan bisa default ke 'all' atau bulan ini
+        $selectedMonth = $request->month ?? date('m'); 
         $selectedYear = $request->year ?? date('Y');
 
-        // 2. Query data laporan
         $query = Report::query();
 
-        // 3. Terapkan filter Bulan dan Tahun
-        $query->whereMonth('created_at', $selectedMonth)
-            ->whereYear('created_at', $selectedYear);
+        // Filter Tahun (Selalu dijalankan)
+        $query->whereYear('created_at', $selectedYear);
 
-        // 4. Ambil semua data (tanpa paginate agar semua pin muncul di peta)
+        // Filter Bulan (Hanya jika bukan 'all')
+        if ($selectedMonth !== 'all') {
+            $query->whereMonth('created_at', $selectedMonth);
+        }
+
         $reports = $query->get();
 
-        return Inertia::render('User/Map', [ // Sesuaikan nama file .jsx peta Anda
+        return Inertia::render('User/Map', [
             'reports' => $reports,
             'filters' => [
-                'month' => (string)$selectedMonth, // cast ke string agar cocok dengan value <select>
+                'month' => $selectedMonth,
                 'year' => (string)$selectedYear
             ]
         ]);
