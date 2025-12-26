@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
+            $table->string('nomor_laporan')->unique()->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Pengunggah
             $table->string('foto_jalan')->nullable(); // Nama file/path foto
             $table->string('judul_laporan'); // Contoh: Jalan Berlubang Madukara

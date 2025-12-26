@@ -193,7 +193,7 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-blue-900">
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">#</th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">No Lap</th>
                                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">Pelapor</th>
                                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">Judul & Lokasi</th>
                                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">Status</th>
@@ -206,11 +206,12 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                             <tr key={report.id} className="hover:bg-gray-50 transition">
                                                 <td className="px-6 py-4 text-sm text-gray-500">
                                                     {/* Rumus: (Halaman_Sekarang - 1) * Per_Halaman + Index + 1 */}
-                                                    {(reports?.current_page - 1) * reports?.per_page + index + 1}
+                                                    {/* {(reports?.current_page - 1) * reports?.per_page + index + 1} */}
+                                                    {reports?.data[index]?.nomor_laporan}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="text-sm font-bold text-gray-900">{report.user.name}</div>
-                                                    <div className="text-xs text-gray-500">{new Date(report.created_at).toLocaleDateString()}</div>
+                                                    <div className="text-xs text-gray-500">{new Date(report.created_at).toLocaleDateString('id-ID')}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="text-sm font-semibold text-blue-900 flex items-center">

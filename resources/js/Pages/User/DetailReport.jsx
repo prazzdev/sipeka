@@ -267,7 +267,7 @@ export default function DetailReport({ auth, report }) {
                         })}
                     </div>
 
-                    {(auth.user.role === 'admin' || auth.user.role === 'kadis') && (
+                    {/* {(auth.user.role === 'admin' || auth.user.role === 'kadis') && (
                         <form onSubmit={submitComment} className="mt-4 pt-4 border-t">
                             <textarea
                                 className="border-gray-300 focus:border-yellow-500 rounded-xl focus:ring-yellow-500 w-full text-sm"
@@ -326,7 +326,7 @@ export default function DetailReport({ auth, report }) {
                                 Kirim Tanggapan Resmi
                             </button>
                         </form>
-                    )}
+                    )} */}
                 </div>
             </div>
         </AuthenticatedLayout>
