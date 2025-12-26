@@ -36,39 +36,57 @@ class ReportController extends Controller
     // Menyimpan laporan baru ke database
     public function store(Request $request)
     {
+        // 1. Validasi Data
         $request->validate([
             'judul_laporan' => 'required|string|max:255',
-            'deskripsi' => 'required',
-            'foto_jalan' => 'required|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'lokasi_detail' => 'required',
+            'deskripsi' => 'required|string',
+            'foto_jalan' => 'required|image|mimes:jpg,jpeg,png|max:2048', 
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'lokasi_detail' => 'required|string',
         ]);
 
-        // Proses Upload Foto
+        // 2. Proses Upload Foto
+        $path = null;
         if ($request->hasFile('foto_jalan')) {
             $path = $request->file('foto_jalan')->store('laporan-jalan', 'public');
         }
 
-        Report::create([
+        // 3. Simpan ke Database (Tampung hasil create ke variabel $report)
+        $report = Report::create([
             'user_id' => auth()->id(),
+            'nomor_laporan' => null, 
             'judul_laporan' => $request->judul_laporan,
             'deskripsi' => $request->deskripsi,
             'foto_jalan' => $path,
+            'lokasi_kecamatan' => 'Madukara', 
+            'lokasi_detail' => $request->lokasi_detail,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            'lokasi_detail' => $request->lokasi_detail,
-            'status' => 'menunggu', // Default status
+            'status' => 'menunggu', 
+            'total_upvote' => 0,
         ]);
 
-        return redirect()->back()->with('message', 'Laporan berhasil dikirim!');
+        // 4. Buat Log Awal di Tabel Comments
+        $report->comments()->create([
+            'user_id' => auth()->id(),
+            'pesan' => 'Laporan berhasil dibuat dan sedang mengantre untuk diverifikasi oleh admin.',
+            'status' => 'menunggu',
+            'foto_tanggapan' => null, // Warga tidak mengirim foto tanggapan di awal
+        ]);
+
+        // 5. Redirect
+        return redirect()->route('beranda')->with('message', 'Laporan berhasil dikirim dan akan segera diverifikasi!');
     }
     
     // Halaman Detail Laporan
     public function show(Report $report)
     {
         // Ambil detail laporan beserta pengunggahnya
-        $report->load(['user', 'comments.user']);
+        // Kita tambahkan orderBy agar histori progres urut dari yang terlama ke terbaru
+        $report->load(['user', 'comments' => function($query) {
+            $query->orderBy('created_at', 'asc');
+        }, 'comments.user']);
         
         // Cek apakah user login sudah upvote untuk status tombol di detail
         $report->upvoted = $report->upvotes()->where('user_id', auth()->id())->exists();
@@ -155,18 +173,21 @@ class ReportController extends Controller
             $path = $request->file('foto_tanggapan')->store('tanggapan-admin', 'public');
         }
 
-        $report->update([
-            'status' => $request->status
-        ]);
+        // Menggunakan DB Transaction agar aman
+        \DB::transaction(function () use ($request, $report, $path) {
+            // 1. Update status laporan
+            $report->update([
+                'status' => $request->status
+            ]);
 
-        // dd($request->status);
-
-        $report->comments()->create([
-            'user_id' => auth()->id(),
-            'pesan' => $request->pesan,
-            'status' => $request->status,
-            'foto_tanggapan' => $path, 
-        ]);
+            // 2. Buat tanggapan/histori
+            $report->comments()->create([
+                'user_id' => auth()->id(),
+                'pesan' => $request->pesan,
+                'status' => $request->status,
+                'foto_tanggapan' => $path, 
+            ]);
+        });
 
         return redirect()->back()->with('message', 'Progres laporan berhasil diperbarui!');
     }

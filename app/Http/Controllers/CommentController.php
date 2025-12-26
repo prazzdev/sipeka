@@ -57,27 +57,41 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment)
     {
-        // 1. Keamanan (Sudah benar)
+        // 1. Keamanan
         if (auth()->id() !== $comment->user_id && auth()->user()->role !== 'admin') {
             abort(403, 'Anda tidak memiliki akses untuk menghapus ini.');
         }
 
-        // 2. Hapus file gambar dari storage (Sudah benar)
+        // 2. Ambil Report melalui relasi (Gunakan ini sebelum comment didelete)
+        $report = $comment->report;
+
+        // Tambahan: Pastikan report ditemukan untuk menghindari error "on null"
+        if (!$report) {
+            return redirect()->back()->with('error', 'Data laporan terkait tidak ditemukan.');
+        }
+
+        // 3. Hapus file gambar jika ada
         if ($comment->foto_tanggapan) {
             Storage::disk('public')->delete($comment->foto_tanggapan);
         }
 
-        // 3. Simpan report_id sebelum dihapus untuk keperluan sinkronisasi (Opsional/Saran)
-        $reportId = $comment->report_id;
-
         // 4. Hapus Komentar
         $comment->delete();
 
-        /* TIPS SKRIPSI: 
-        Idealnya, setelah komentar dihapus, kita bisa mengecek histori terakhir 
-        agar status di tabel 'reports' tetap akurat. 
-        */
+        // 5. Sinkronisasi Status
+        // Kita panggil relasi comments dari objek $report yang sudah kita ambil di atas
+        $lastComment = $report->comments()->latest()->first();
 
-        return redirect()->back()->with('message', 'Tanggapan dan bukti foto berhasil dihapus.');
+        if ($lastComment) {
+            $report->update([
+                'status' => $lastComment->status
+            ]);
+        } else {
+            $report->update([
+                'status' => 'menunggu'
+            ]);
+        }
+
+        return redirect()->back()->with('message', 'Tanggapan dihapus dan status laporan disesuaikan.');
     }
 }

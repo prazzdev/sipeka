@@ -10,9 +10,19 @@ class Report extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'foto_jalan', 'judul_laporan', 'deskripsi', 
-        'lokasi_detail', 'latitude', 'longitude', 'status'
-    ];
+    'nomor_laporan',
+    'user_id',
+    'foto_jalan',
+    'judul_laporan',
+    'deskripsi',
+    'lokasi_kecamatan',
+    'lokasi_detail',
+    'latitude',
+    'longitude',
+    'status',
+    'total_upvote',
+    'alasan_ditolak',
+];
 
     protected static function boot()
     {
@@ -51,5 +61,10 @@ class Report extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class)->latest();
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(ReportLog::class)->latest();
     }
 }

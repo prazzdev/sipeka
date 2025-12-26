@@ -175,54 +175,6 @@ export default function DetailReport({ auth, report }) {
                     </h3>
 
                     {/* List Komentar */}
-                    {/* <div className="space-y-4 mb-6">
-                        {report.comments.map((comment) => (
-                            <div key={comment.id} className="bg-gray-50 p-4 border border-gray-100 rounded-xl">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="flex items-center font-bold text-blue-900 text-sm">
-                                        <div className="flex justify-center items-center bg-yellow-400 mr-2 rounded-full w-6 h-6 text-[10px]">
-                                            PUPR
-                                        </div>
-                                        {comment.user.name} 
-                                        {comment.user.role !== 'user' && <span className="bg-blue-100 ml-2 px-2 py-0.5 rounded text-[10px] text-blue-600">Official</span>}
-                                    </span>
-                                    <div className="flex items-center space-x-2">
-                                        <span className="font-medium text-[10px] text-gray-400">
-                                            {new Date(comment.created_at).toLocaleDateString('id-ID')} • {new Date(comment.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                                        </span>
-                                        
-                                        {(auth.user.id === comment.user_id || auth.user.role === 'admin') && (
-                                            <button
-                                                onClick={() => {
-                                                    if(confirm('Hapus tanggapan ini?')) {
-                                                        router.delete(route('komentar.destroy', comment.id), {
-                                                            preserveScroll: true
-                                                        });
-                                                    }
-                                                }}
-                                                className="opacity-100 p-1 text-red-400 hover:text-red-600 transition"
-                                                title="Hapus Tanggapan"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                                <p className="text-gray-700 text-sm">{comment.pesan}</p>
-
-                                {comment.foto_tanggapan && (
-                                    <div className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
-                                        <img 
-                                            src={`/storage/${comment.foto_tanggapan}`} 
-                                            alt="Foto Progres" 
-                                            className="hover:opacity-90 w-full max-h-60 object-cover cursor-pointer"
-                                            onClick={() => window.open(`/storage/${comment.foto_tanggapan}`, '_blank')}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div> */}
                     <div className="space-y-4 mt-6 ml-2 max-sm:-ml-1 pl-4 border-gray-100 border-l-2">
                         <h4 className="mb-7 font-black text-gray-400 text-xs uppercase tracking-widest">Histori Progres</h4>
                         

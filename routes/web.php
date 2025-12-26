@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/buat', function () {
         return Inertia::render('User/CreateReport');
     })->name('laporan.create');
+    // Simpan Laporan
+    Route::post('/laporan', [ReportController::class, 'store'])->name('laporan.store');
     
     // Halaman Detail Laporan
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->name('laporan.show');
@@ -43,22 +45,18 @@ Route::middleware('auth')->group(function () {
 // Route khusus Admin & Kadis
 Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
     Route::get('/admin/dashboard', [ReportController::class, 'adminDashboard'])->name('admin.dashboard');
-    Route::post('/admin/laporan/{report}/status', [ReportController::class, 'updateStatus'])->name('admin.status.update');
     Route::get('/admin/export-pdf', [ReportController::class, 'exportPdf'])->name('admin.export');
-
-    // Komentar pada Laporan
-    Route::post('/laporan/{report}/komentar', [CommentController::class, 'store'])->name('komentar.store');
-
-    Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('komentar.destroy');
-});
-
-Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
-    // Halaman kelola detail & komentar
+    
+    // Halaman kelola laporan & update status
+    Route::post('/admin/laporan/{report}/status', [ReportController::class, 'updateStatus'])->name('admin.status.update');
     Route::get('/admin/laporan/{report}/manage', [ReportController::class, 'manage'])->name('admin.report.manage');
     
-    // Action Edit & Hapus Komentar
+    // Action Komentar
+    Route::post('/laporan/{report}/komentar', [CommentController::class, 'store'])->name('komentar.store');
     Route::patch('/admin/comment/{comment}', [CommentController::class, 'update'])->name('admin.comment.update');
     Route::delete('/admin/comment/{comment}', [CommentController::class, 'destroy'])->name('admin.comment.destroy');
+
+    // Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('komentar.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
