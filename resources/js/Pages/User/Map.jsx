@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -22,18 +22,45 @@ const createCustomIcon = (status) => {
     });
 };
 
-export default function MapPage({ auth, reports }) {
+export default function MapPage({ auth, reports, filters }) {
     const centerMadukara = [-7.3891, 109.7185];
 
-    // Logika Jam Real-time
-    const [currentTime, setCurrentTime] = useState(new Date());
+    // State untuk filter lokal
+    const [filterData, setFilterData] = useState({
+        month: filters.month,
+        year: filters.year
+    });
 
+    // Jalankan filter saat dropdown berubah
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        const newData = { ...filterData, [name]: value };
+        setFilterData(newData);
+        
+        // Kirim request ke server menggunakan Inertia router
+        router.get(route('peta.index'), newData, {
+            preserveState: true,
+            replace: true
+        });
+    };
+
+    // Logika Jam Real-time (seperti sebelumnya)
+    const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Opsi Bulan & Tahun
+    const months = [
+        { v: '01', l: 'Januari' }, { v: '02', l: 'Februari' }, { v: '03', l: 'Maret' },
+        { v: '04', l: 'April' }, { v: '05', l: 'Mei' }, { v: '06', l: 'Juni' },
+        { v: '07', l: 'Juli' }, { v: '08', l: 'Agustus' }, { v: '09', l: 'September' },
+        { v: '10', l: 'Oktober' }, { v: '11', l: 'November' }, { v: '12', l: 'Desember' }
+    ];
+    
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
     // Formatter Tanggal Indonesia
     const formattedDate = currentTime.toLocaleDateString('id-ID', {
@@ -58,11 +85,39 @@ export default function MapPage({ auth, reports }) {
 
             <div className="py-6">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {/* Live Monitoring */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 px-2 gap-2">
                         <div>
                             <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider">Live Monitoring</h3>
                             <p className="text-[10px] text-gray-500 italic">Data sebaran kerusakan jalan di wilayah Kec. Madukara</p>
                         </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-4 px-2 gap-4">
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <div className="flex flex-col">
+                                <label className="text-[10px] font-bold text-blue-900 ml-1">BULAN</label>
+                                <select 
+                                    name="month" 
+                                    value={filterData.month} 
+                                    onChange={handleFilterChange}
+                                    className="border-gray-300 rounded-lg text-xs focus:ring-blue-500"
+                                >
+                                    {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-[10px] font-bold text-blue-900 ml-1">TAHUN</label>
+                                <select 
+                                    name="year" 
+                                    value={filterData.year} 
+                                    onChange={handleFilterChange}
+                                    className="border-gray-300 rounded-lg text-xs focus:ring-blue-500"
+                                >
+                                    {[2023, 2024, 2025].map(y => <option key={y} value={y}>{y}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
                         <div className="bg-blue-900 text-white px-4 py-2 rounded-xl shadow-lg shadow-blue-200 flex items-center gap-3">
                             <div className="flex flex-col items-end">
                                 <span className="text-[10px] font-medium text-blue-200">{formattedDate}</span>
@@ -71,6 +126,7 @@ export default function MapPage({ auth, reports }) {
                             <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
                         </div>
                     </div>
+                    {/* Map */}
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200">
                         <div style={{ height: '70vh', width: '100%' }}>
                             <MapContainer 

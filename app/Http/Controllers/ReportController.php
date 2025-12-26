@@ -78,11 +78,28 @@ class ReportController extends Controller
         ]);
     }
 
-    public function map()
+    public function map(Request $request)
     {
-        $reports = Report::all(); // Mengambil semua titik koordinat
-        return Inertia::render('User/Map', [
-            'reports' => $reports
+        // 1. Ambil input filter atau gunakan default (bulan dan tahun ini)
+        $selectedMonth = $request->month ?? date('m');
+        $selectedYear = $request->year ?? date('Y');
+
+        // 2. Query data laporan
+        $query = Report::query();
+
+        // 3. Terapkan filter Bulan dan Tahun
+        $query->whereMonth('created_at', $selectedMonth)
+            ->whereYear('created_at', $selectedYear);
+
+        // 4. Ambil semua data (tanpa paginate agar semua pin muncul di peta)
+        $reports = $query->get();
+
+        return Inertia::render('User/Map', [ // Sesuaikan nama file .jsx peta Anda
+            'reports' => $reports,
+            'filters' => [
+                'month' => (string)$selectedMonth, // cast ke string agar cocok dengan value <select>
+                'year' => (string)$selectedYear
+            ]
         ]);
     }
 
