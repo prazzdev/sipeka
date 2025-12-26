@@ -210,27 +210,57 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request)
     {
+        // 1. Ambil parameter filter dari URL (Query String)
         $statusFilter = $request->query('status');
+        $search = $request->query('search');
+        $sortBy = $request->query('sort', 'latest');
+
+        // 2. Bangun Query yang sama dengan Dashboard
         $query = Report::with('user');
 
+        // Fitur Search
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_laporan', 'like', "%{$search}%")
+                ->orWhere('judul_laporan', 'like', "%{$search}%")
+                ->orWhereHas('user', function($u) use ($search) {
+                    $u->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Fitur Filter Status
         if ($statusFilter) {
             $query->where('status', $statusFilter);
         }
 
-        $reports = $query->latest()->get();
+        // Fitur Sorting
+        if ($sortBy === 'upvote') {
+            $query->orderBy('total_upvote', 'desc');
+        } else {
+            $query->latest();
+        }
 
-        // Data yang akan dikirim ke view PDF
-        $data = [
-            'title' => 'Laporan Kerusakan Jalan Kecamatan Madukara',
-            'date' => date('d/m/Y'),
-            'reports' => $reports,
-            'status' => $statusFilter ?? 'Semua'
-        ];
+        // 3. Ambil data (Gunakan get() karena PDF tidak dipaginasi)
+        $reports = $query->get();
 
-        $pdf = Pdf::loadView('pdf.reports', $data);
+        // 4. Logika Penamaan File yang Dinamis
+        $date = now()->format('d-m-Y');
+        $statusName = $statusFilter ? ucfirst($statusFilter) : 'Semua-Status';
+        $searchName = $search ? "-KataKunci-{$search}" : "";
         
-        // Download file PDF
-        return $pdf->download('laporan-sipeka-' . date('Y-m-d') . '.pdf');
+        // Nama file: Laporan_SIPEKA_Selesai_KataKunci-Madukara_27-12-2025.pdf
+        $fileName = "Laporan_SIPEKA_{$statusName}{$searchName}_{$date}.pdf";
+
+        // 5. Generate PDF menggunakan view blade
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.reports', [
+            'reports' => $reports,
+            'status' => $statusFilter,
+            'date' => $date
+        ]);
+
+        // 6. Download file
+        return $pdf->download($fileName);
     }
 
     public function manage(Report $report)
