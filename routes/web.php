@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->name('laporan.show');
     // Hapus Laporan
     Route::delete('/laporan/{report}', [ReportController::class, 'destroy'])->name('laporan.destroy');
+    // Halaman Laporan Saya
+    Route::get('/laporan-saya', [ReportController::class, 'myReports'])->name('laporan.saya');
 
     // Halaman Peta
     Route::get('/peta', [ReportController::class, 'map'])->name('peta.index');

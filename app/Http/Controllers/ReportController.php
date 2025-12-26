@@ -243,4 +243,15 @@ class ReportController extends Controller
 
         return redirect()->route('beranda')->with('message', 'Laporan berhasil dihapus.');
     }
+
+    public function myReports()
+    {
+        $reports = Report::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return Inertia::render('User/MyReports', [
+            'reports' => $reports
+        ]);
+    }
 }

@@ -147,6 +147,9 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Beranda
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('peta.index')} active={route().current('peta.index')}>
+                            Peta Kerusakan
+                        </ResponsiveNavLink>
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -173,8 +176,8 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="border-t border-gray-200 pt-2 pb-3 space-y-1">
-                            <ResponsiveNavLink href={route('peta.index')} active={route().current('peta.index')}>
-                                Peta Kerusakan
+                            <ResponsiveNavLink href={route('laporan.saya')} active={route().current('laporan.saya')}>
+                                Laporan Saya
                             </ResponsiveNavLink>
                             <ResponsiveNavLink href={route('laporan.create')} active={route().current('laporan.create')}>
                                 Buat Laporan
