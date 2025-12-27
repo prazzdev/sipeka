@@ -32,6 +32,18 @@ export default function Dashboard({ auth, reports, stats, filters}) {
         reset(); 
     };
 
+    // Opsi Tahun (3 tahun kebelakang)
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 4 }, (_, i) => currentYear - i);
+
+    const months = [
+        { v: 'all', l: 'Semua Bulan' },
+        { v: '01', l: 'Januari' }, { v: '02', l: 'Februari' }, { v: '03', l: 'Maret' },
+        { v: '04', l: 'April' }, { v: '05', l: 'Mei' }, { v: '06', l: 'Juni' },
+        { v: '07', l: 'Juli' }, { v: '08', l: 'Agustus' }, { v: '09', l: 'September' },
+        { v: '10', l: 'Oktober' }, { v: '11', l: 'November' }, { v: '12', l: 'Desember' }
+    ];
+
     const handleFilterChange = (key, value) => {
         router.get(route('admin.dashboard'), 
             { ...filters, [key]: value }, 
@@ -166,9 +178,8 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                     </div>
 
                     {/* Filter & Sort Bar */}
-                    <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-col lg:flex-row justify-between items-center gap-4">
+                    {/* <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-col lg:flex-row justify-between items-center gap-4">
                         <div className="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto">
-                            {/* Input Search */}
                             <div className="relative w-full md:w-80">
                                 <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                                 <input 
@@ -214,6 +225,69 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                             >
                                 <Printer size={16} className="mr-2" />
                                 Export PDF
+                            </a>
+                        </div>
+                    </div> */}
+
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-wrap items-center justify-between gap-4">
+                        
+                        {/* Kolom Search (Kiri) */}
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                            <input 
+                                type="text"
+                                placeholder="Cari laporan..."
+                                defaultValue={filters.search}
+                                onBlur={(e) => handleFilterChange('search', e.target.value)}
+                                className="pl-10 w-full rounded-lg border-gray-300 text-sm focus:ring-blue-900"
+                            />
+                        </div>
+
+                        {/* Dropdown Filters (Tengah) */}
+                        <div className="flex flex-wrap items-center gap-2">
+                            <select 
+                                value={filters.month || 'all'} 
+                                onChange={(e) => handleFilterChange('month', e.target.value)}
+                                className="rounded-lg border-gray-300 text-sm font-bold text-gray-600 focus:ring-blue-900"
+                            >
+                                {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+                            </select>
+
+                            <select 
+                                value={filters.year || currentYear} 
+                                onChange={(e) => handleFilterChange('year', e.target.value)}
+                                className="rounded-lg border-gray-300 text-sm font-bold text-gray-600 focus:ring-blue-900"
+                            >
+                                {years.map(y => <option key={y} value={y}>{y}</option>)}
+                            </select>
+
+                            <select 
+                                value={filters.status || ''} 
+                                onChange={(e) => handleFilterChange('status', e.target.value)}
+                                className="rounded-lg border-gray-300 text-sm font-bold text-blue-900 focus:ring-blue-900"
+                            >
+                                <option value="">Semua Status</option>
+                                <option value="menunggu">Menunggu</option>
+                                <option value="diproses">Diproses</option>
+                                <option value="selesai">Selesai</option>
+                            </select>
+                        </div>
+
+                        {/* Export & Sort (Kanan) */}
+                        <div className="flex items-center gap-2">
+                            <select 
+                                value={filters.sort || 'latest'} 
+                                onChange={(e) => handleFilterChange('sort', e.target.value)}
+                                className="rounded-lg border-gray-300 text-sm font-bold focus:ring-blue-900"
+                            >
+                                <option value="latest">Terbaru</option>
+                                <option value="upvote">Populer</option>
+                            </select>
+                            <a 
+                                href={route('admin.export', filters)} 
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700 transition flex items-center"
+                            >
+                                <Printer size={16} className="mr-2" /> Export
                             </a>
                         </div>
                     </div>

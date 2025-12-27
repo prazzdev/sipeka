@@ -123,13 +123,14 @@ class ReportController extends Controller
         ]);
     }
 
-    // Halaman Dashboard Admin/Kadis
     public function adminDashboard(Request $request)
     {
         // Ambil parameter dari request
         $statusFilter = $request->query('status');
         $sortBy = $request->query('sort', 'latest');
-        $search = $request->query('search'); // Tambahkan parameter search
+        $search = $request->query('search');
+        $monthFilter = $request->query('month'); 
+        $yearFilter = $request->query('year');
 
         $query = Report::with('user');
 
@@ -149,6 +150,14 @@ class ReportController extends Controller
             $query->where('status', $statusFilter);
         }
 
+        // --- Filter Bulan & Tahun (Baru) ---
+        if ($monthFilter && $monthFilter !== 'all') {
+            $query->whereMonth('created_at', $monthFilter);
+        }
+        if ($yearFilter) {
+            $query->whereYear('created_at', $yearFilter);
+        }
+
         // 3. Fitur Sorting
         if ($sortBy === 'upvote') {
             $query->orderBy('total_upvote', 'desc');
@@ -158,21 +167,25 @@ class ReportController extends Controller
 
         $reports = $query->paginate(10)->withQueryString();
         
+        // Kita buat clone query agar tidak terganggu pagination
+        $statQuery = clone $query;
+
         // 4. Statistik Lengkap
+        // --- Statistik (Gunakan Query yang sama agar sinkron) ---
+        
         $stats = [
-            'total' => Report::count(),
-            'pending' => Report::where('status', 'menunggu')->count(),
-            'proses' => Report::where('status', 'diproses')->count(),
-            'selesai' => Report::where('status', 'selesai')->count(),
-            'hari_ini' => Report::whereDate('created_at', now())->count(),
-            'bulan_ini' => Report::whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)->count(),
+            'total' => $statQuery->count(),
+            'pending' => (clone $statQuery)->where('status', 'menunggu')->count(),
+            'proses' => (clone $statQuery)->where('status', 'diproses')->count(),
+            'selesai' => (clone $statQuery)->where('status', 'selesai')->count(),
+            'hari_ini' => Report::whereDate('created_at', now())->count(), // Tetap global
+            'bulan_ini' => Report::whereMonth('created_at', now()->month)->count(), // Tetap global
         ];
 
         return Inertia::render('Admin/Dashboard', [
             'reports' => $reports,
             'stats' => $stats,
-            'filters' => $request->only(['status', 'sort', 'search']) // Tambahkan search ke filters
+            'filters' => $request->only(['status', 'sort', 'search', 'month', 'year'])
         ]);
     }
 
@@ -210,12 +223,14 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request)
     {
-        // 1. Ambil parameter filter dari URL (Query String)
+        // 1. Ambil parameter filter (Termasuk Bulan dan Tahun)
         $statusFilter = $request->query('status');
         $search = $request->query('search');
         $sortBy = $request->query('sort', 'latest');
+        $monthFilter = $request->query('month'); 
+        $yearFilter = $request->query('year');
 
-        // 2. Bangun Query yang sama dengan Dashboard
+        // 2. Bangun Query
         $query = Report::with('user');
 
         // Fitur Search
@@ -234,6 +249,14 @@ class ReportController extends Controller
             $query->where('status', $statusFilter);
         }
 
+        // Fitur Filter Bulan & Tahun (Sinkron dengan Dashboard)
+        if ($monthFilter && $monthFilter !== 'all') {
+            $query->whereMonth('created_at', $monthFilter);
+        }
+        if ($yearFilter) {
+            $query->whereYear('created_at', $yearFilter);
+        }
+
         // Fitur Sorting
         if ($sortBy === 'upvote') {
             $query->orderBy('total_upvote', 'desc');
@@ -241,22 +264,25 @@ class ReportController extends Controller
             $query->latest();
         }
 
-        // 3. Ambil data (Gunakan get() karena PDF tidak dipaginasi)
+        // 3. Ambil data
         $reports = $query->get();
 
-        // 4. Logika Penamaan File yang Dinamis
-        $date = now()->format('d-m-Y');
+        // 4. Logika Penamaan File yang Dinamis & Informatif
+        $dateNow = now()->format('d-m-Y');
         $statusName = $statusFilter ? ucfirst($statusFilter) : 'Semua-Status';
-        $searchName = $search ? "-KataKunci-{$search}" : "";
+        $monthName = ($monthFilter && $monthFilter !== 'all') ? "-Bulan-{$monthFilter}" : "";
+        $yearName = $yearFilter ? "-Tahun-{$yearFilter}" : "";
         
-        // Nama file: Laporan_SIPEKA_Selesai_KataKunci-Madukara_27-12-2025.pdf
-        $fileName = "Laporan_SIPEKA_{$statusName}{$searchName}_{$date}.pdf";
+        // Contoh: Laporan_SIPEKA_Selesai-Bulan-01-Tahun-2025_27-12-2025.pdf
+        $fileName = "Laporan_SIPEKA_{$statusName}{$monthName}{$yearName}_{$dateNow}.pdf";
 
-        // 5. Generate PDF menggunakan view blade
+        // 5. Generate PDF
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.reports', [
             'reports' => $reports,
             'status' => $statusFilter,
-            'date' => $date
+            'month' => $monthFilter,
+            'year' => $yearFilter,
+            'date' => $dateNow
         ]);
 
         // 6. Download file
