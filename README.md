@@ -1,13 +1,15 @@
 # SIPEKA
 
-Sistem Informasi Pelaporan Kerusakan (SIPEKA) adalah aplikasi web berbasis Laravel yang memungkinkan pengguna untuk melaporkan kerusakan atau masalah publik, memberikan upvote pada laporan, dan memungkinkan admin untuk mengelola status laporan. Aplikasi ini menggunakan Inertia.js untuk pengalaman SPA (Single Page Application) dengan React di frontend dan Tailwind CSS untuk styling.
+Sistem Informasi Pelaporan Kerusakan (SIPEKA) adalah aplikasi web berbasis Laravel yang memungkinkan pengguna untuk melaporkan kerusakan atau masalah publik, memberikan upvote pada laporan, memberikan komentar, dan memungkinkan admin untuk mengelola status laporan serta mengekspor data. Aplikasi ini menggunakan Inertia.js untuk pengalaman SPA (Single Page Application) dengan React di frontend dan Tailwind CSS untuk styling.
 
 ## Fitur Utama
 
 - **Pelaporan Kerusakan**: Pengguna dapat membuat laporan kerusakan dengan detail lokasi dan deskripsi.
 - **Upvote Laporan**: Pengguna dapat memberikan upvote pada laporan yang mereka dukung.
-- **Peta Interaktif**: Tampilan peta untuk melihat lokasi laporan.
-- **Dashboard Admin**: Admin dan Kadis dapat melihat semua laporan dan mengupdate statusnya.
+- **Komentar pada Laporan**: Pengguna dapat memberikan komentar pada laporan untuk diskusi lebih lanjut.
+- **Peta Interaktif**: Tampilan peta menggunakan Leaflet untuk melihat lokasi laporan.
+- **Dashboard Admin**: Admin dan Kadis dapat melihat semua laporan, mengupdate statusnya, dan mengelola komentar.
+- **Export Laporan**: Admin dapat mengekspor laporan ke format PDF menggunakan DomPDF.
 - **Autentikasi**: Sistem login dan registrasi dengan role-based access (user, admin, kadis).
 - **Responsive Design**: Menggunakan Tailwind CSS untuk tampilan yang responsif.
 
@@ -15,7 +17,7 @@ Sistem Informasi Pelaporan Kerusakan (SIPEKA) adalah aplikasi web berbasis Larav
 
 Sebelum menjalankan aplikasi ini, pastikan Anda memiliki:
 
-- PHP >= 8.1
+- PHP >= 8.2
 - Composer
 - Node.js >= 16
 - NPM atau Yarn
@@ -25,7 +27,7 @@ Sebelum menjalankan aplikasi ini, pastikan Anda memiliki:
 
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/username/sipeka.git
+   git clone https://github.com/prazzdev/sipeka.git
    cd sipeka
    ```
 
@@ -78,16 +80,34 @@ Sebelum menjalankan aplikasi ini, pastikan Anda memiliki:
    - Registrasi akun baru atau login
    - Buat laporan di halaman `/laporan/buat`
    - Lihat laporan di beranda `/beranda`
-   - Admin dapat mengakses dashboard di `/admin/dashboard`
+   - Berikan upvote atau komentar pada laporan
+   - Lihat peta laporan di `/peta`
+   - Admin dapat mengakses dashboard di `/admin/dashboard` dan mengekspor laporan
 
 ## Struktur Proyek
 
-- `app/Http/Controllers/`: Controller untuk menangani request
-- `app/Models/`: Model Eloquent (User, Report, Upvote)
-- `resources/js/`: Komponen React dan JavaScript
+- `app/Http/Controllers/`: Controller untuk menangani request (ReportController, CommentController, UpvoteController, dll.)
+- `app/Models/`: Model Eloquent (User, Report, Upvote, Comment, ReportLog)
+- `resources/js/`: Komponen React dan JavaScript menggunakan Inertia.js
 - `routes/web.php`: Definisi route
 - `database/migrations/`: Migration database
 - `database/seeders/`: Seeder untuk data awal
+- `public/`: File statis dan build assets
+
+## Dependencies Utama
+
+### PHP
+- Laravel Framework ^11.0
+- Inertia.js ^2.0
+- DomPDF ^3.1 (untuk export PDF)
+- Ziggy ^2.0 (untuk routing JavaScript)
+
+### JavaScript
+- React ^18.2.0
+- Inertia.js React ^2.0
+- Tailwind CSS ^3.2.1
+- Leaflet ^1.9.4 (untuk peta interaktif)
+- SweetAlert2 ^11.26.17 (untuk alert)
 
 ## Testing
 
