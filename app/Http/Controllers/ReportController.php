@@ -279,10 +279,10 @@ class ReportController extends Controller
         // 5. Generate PDF
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.reports', [
             'reports' => $reports,
-            'status' => $statusFilter,
-            'month' => $monthFilter,
-            'year' => $yearFilter,
-            'date' => $dateNow
+            'status'  => $statusFilter ?: 'Semua Status', 
+            'date'    => $dateNow,
+            'month'   => $monthFilter,
+            'year'    => $yearFilter,
         ]);
 
         // 6. Download file

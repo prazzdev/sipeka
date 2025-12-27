@@ -281,7 +281,6 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    {/* <div className="text-xs text-gray-500">{report.lokasi_detail}</div> */}
                                                     <div className="text-sm text-gray-900 flex items-center group">
                                                         {report.lokasi_detail}
                                                         <a 
@@ -300,16 +299,6 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    {/* <select 
-                                                        className="text-xs border-gray-300 rounded-lg focus:ring-yellow-500"
-                                                        value={report.status}
-                                                        onChange={(e) => handleStatusChange(report.id, e.target.value)}
-                                                    >
-                                                        <option value="menunggu">Set Menunggu</option>
-                                                        <option value="diverifikasi">Verifikasi</option>
-                                                        <option value="diproses">Proses Jalan</option>
-                                                        <option value="selesai">Selesai</option>
-                                                    </select> */}
                                                     <div className="flex items-center justify-center space-x-2">
                                                         <Link 
                                                             href={route('laporan.show', report.id)} 
@@ -338,9 +327,32 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                             </tr>
                                         ))
                                     ) : (
-                                        <div className="w-full text-center py-20 bg-white rounded-md border border-dashed">
-                                            <p className="text-gray-500 font-medium">Belum ada laporan saat ini.</p>
-                                        </div>
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-20 text-center">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    {/* Icon untuk mempercantik tampilan */}
+                                                    <div className="p-4 bg-gray-50 rounded-full mb-4">
+                                                        <Search size={40} className="text-gray-300" />
+                                                    </div>
+                                                    <h3 className="text-gray-900 font-bold text-lg">
+                                                        {filters.search ? 'Laporan tidak ditemukan' : 'Belum ada laporan'}
+                                                    </h3>
+                                                    <p className="text-gray-500 text-sm max-w-xs mx-auto mt-1">
+                                                        {filters.search 
+                                                            ? `Tidak ada hasil untuk kata kunci "${filters.search}". Coba gunakan kata kunci lain.` 
+                                                            : 'Saat ini belum ada data laporan yang masuk ke dalam sistem.'}
+                                                    </p>
+                                                    {filters.search && (
+                                                        <button 
+                                                            onClick={() => handleFilterChange('search', '')}
+                                                            className="mt-4 text-blue-900 font-bold text-xs uppercase tracking-widest hover:underline"
+                                                        >
+                                                            Bersihkan Pencarian
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
                                     )}
                                 </tbody>
                             </table>
