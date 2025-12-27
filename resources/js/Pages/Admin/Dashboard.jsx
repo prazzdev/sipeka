@@ -178,57 +178,6 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                     </div>
 
                     {/* Filter & Sort Bar */}
-                    {/* <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-col lg:flex-row justify-between items-center gap-4">
-                        <div className="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto">
-                            <div className="relative w-full md:w-80">
-                                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                                <input 
-                                    type="text"
-                                    placeholder="Cari No. Laporan / Judul / Nama Pelapor..."
-                                    defaultValue={filters.search}
-                                    onBlur={(e) => handleFilterChange('search', e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleFilterChange('search', e.target.value)}
-                                    className="pl-10 w-full rounded-xl border-gray-200 text-sm focus:ring-blue-900 focus:border-blue-900 transition"
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-2 w-full md:w-auto">
-                                <label className="text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Status:</label>
-                                <select 
-                                    value={filters.status || ''} 
-                                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                                    className="w-full md:w-auto rounded-lg border-gray-200 text-sm focus:ring-blue-900 font-bold text-blue-900"
-                                >
-                                    <option value="">Semua</option>
-                                    <option value="menunggu">Menunggu</option>
-                                    <option value="diverifikasi">Diverifikasi</option>
-                                    <option value="diproses">Diproses</option>
-                                    <option value="selesai">Selesai</option>
-                                    <option value="ditolak">Ditolak</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 w-full lg:w-auto justify-end">
-                            <select 
-                                value={filters.sort || 'latest'} 
-                                onChange={(e) => handleFilterChange('sort', e.target.value)}
-                                className="rounded-lg border-gray-200 text-sm focus:ring-blue-900 font-bold text-blue-900"
-                            >
-                                <option value="latest">Terbaru</option>
-                                <option value="upvote">Terpopuler</option>
-                            </select>
-
-                            <a 
-                                href={route('admin.export', filters)} 
-                                className="flex items-center bg-green-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition shadow-lg shadow-green-100"
-                            >
-                                <Printer size={16} className="mr-2" />
-                                Export PDF
-                            </a>
-                        </div>
-                    </div> */}
-
                     <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-wrap items-center justify-between gap-4">
                         
                         {/* Kolom Search (Kiri) */}
@@ -268,8 +217,10 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                             >
                                 <option value="">Semua Status</option>
                                 <option value="menunggu">Menunggu</option>
+                                <option value="diverifikasi">Diverifikasi</option>
                                 <option value="diproses">Diproses</option>
                                 <option value="selesai">Selesai</option>
+                                <option value="ditolak">Ditolak</option>
                             </select>
                         </div>
 
@@ -298,6 +249,7 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-blue-900">
                                     <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">###</th>
                                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">No Lap</th>
                                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">Pelapor</th>
                                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase">Judul & Lokasi</th>
@@ -311,7 +263,9 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                             <tr key={report.id} className="hover:bg-gray-50 transition">
                                                 <td className="px-6 py-4 text-sm text-gray-500">
                                                     {/* Rumus: (Halaman_Sekarang - 1) * Per_Halaman + Index + 1 */}
-                                                    {/* {(reports?.current_page - 1) * reports?.per_page + index + 1} */}
+                                                    {(reports?.current_page - 1) * reports?.per_page + index + 1}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">
                                                     {reports?.data[index]?.nomor_laporan}
                                                 </td>
                                                 <td className="px-6 py-4">
