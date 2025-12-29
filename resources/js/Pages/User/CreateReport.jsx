@@ -18,7 +18,7 @@ const DefaultIcon = L.icon({
 });
 
 export default function CreateReport({ auth }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         judul_laporan: '',
         deskripsi: '',
         foto_jalan: null,
@@ -71,6 +71,7 @@ export default function CreateReport({ auth }) {
     const submit = (e) => {
         e.preventDefault();
         post(route('laporan.store'), {
+            forceFormData: true,
             onSuccess: () => {
                 // Munculkan Alert Sukses
                 Swal.fire({
@@ -90,6 +91,12 @@ export default function CreateReport({ auth }) {
                     icon: 'error',
                     confirmButtonText: 'Coba Lagi',
                 });
+                // Swal.fire({
+                //     title: 'Gagal!',
+                //     text: err.message || 'Pastikan semua data dan koordinat lokasi sudah terisi.',
+                //     icon: 'error',
+                //     confirmButtonText: 'Cek Kembali',
+                // });
             }
         });
     };
@@ -130,6 +137,7 @@ export default function CreateReport({ auth }) {
                                         <div className="flex text-sm text-gray-600">
                                             <input 
                                                 type="file" 
+                                                accept="image/*"
                                                 className="absolute inset-0 opacity-0 cursor-pointer"
                                                 onChange={e => setData('foto_jalan', e.target.files[0])}
                                             />

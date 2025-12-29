@@ -41,50 +41,59 @@ class ReportController extends Controller
             'filters' => $request->only(['sort', 'search']) 
         ]);
     }
+
     // Menyimpan laporan baru ke database
     public function store(Request $request)
     {
-        // 1. Validasi Data
         $request->validate([
             'judul_laporan' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'foto_jalan' => 'required|image|mimes:jpg,jpeg,png|max:2048', 
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'required', // Hapus numeric di sini karena data datang sebagai string dari FormData
+            'longitude' => 'required',
             'lokasi_detail' => 'required|string',
         ]);
 
-        // 2. Proses Upload Foto
-        $path = null;
-        if ($request->hasFile('foto_jalan')) {
-            $path = $request->file('foto_jalan')->store('laporan-jalan', 'public');
+        try {
+            $path = null;
+            if ($request->hasFile('foto_jalan')) {
+                $path = $request->file('foto_jalan')->store('laporan-jalan', 'public');
+            }
+
+            // GENERATE NOMOR LAPORAN
+            $today = now()->format('Ymd');
+            $count = Report::whereDate('created_at', now())->count() + 1;
+            $nomorLaporan = "LP-" . $today . "-" . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+            $report = Report::create([
+                'user_id' => auth()->id(),
+                'nomor_laporan' => $nomorLaporan,
+                'judul_laporan' => $request->judul_laporan,
+                'deskripsi' => $request->deskripsi,
+                'foto_jalan' => $path,
+                'lokasi_kecamatan' => 'Madukara', 
+                'lokasi_detail' => $request->lokasi_detail,
+                'latitude' => (float) $request->latitude, // Cast ke float untuk keamanan DB
+                'longitude' => (float) $request->longitude, // Cast ke float untuk keamanan DB
+                'status' => 'menunggu', 
+                'total_upvote' => 0,
+            ]);
+
+            $report->comments()->create([
+                'user_id' => auth()->id(),
+                'pesan' => 'Laporan berhasil dibuat dan sedang mengantre untuk diverifikasi oleh admin.',
+                'status' => 'menunggu',
+            ]);
+
+            return redirect()->route('beranda')->with('message', 'Laporan berhasil dikirim!');
+
+        } catch (\Exception $e) {
+            // Jika gagal simpan, hapus foto yang sudah terlanjur diupload (opsional)
+            if ($path) \Storage::disk('public')->delete($path);
+            
+            // Kembalikan error agar ditangkap oleh onError di React
+            return back()->withErrors(['message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()]);
         }
-
-        // 3. Simpan ke Database (Tampung hasil create ke variabel $report)
-        $report = Report::create([
-            'user_id' => auth()->id(),
-            'nomor_laporan' => null, 
-            'judul_laporan' => $request->judul_laporan,
-            'deskripsi' => $request->deskripsi,
-            'foto_jalan' => $path,
-            'lokasi_kecamatan' => 'Madukara', 
-            'lokasi_detail' => $request->lokasi_detail,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'status' => 'menunggu', 
-            'total_upvote' => 0,
-        ]);
-
-        // 4. Buat Log Awal di Tabel Comments
-        $report->comments()->create([
-            'user_id' => auth()->id(),
-            'pesan' => 'Laporan berhasil dibuat dan sedang mengantre untuk diverifikasi oleh admin.',
-            'status' => 'menunggu',
-            'foto_tanggapan' => null, // Warga tidak mengirim foto tanggapan di awal
-        ]);
-
-        // 5. Redirect
-        return redirect()->route('beranda')->with('message', 'Laporan berhasil dikirim dan akan segera diverifikasi!');
     }
     
     // Halaman Detail Laporan

@@ -46,11 +46,11 @@ class ReportFactory extends Factory
         }
 
         $sequence = str_pad(self::$sequences[$datePrefix], 2, '0', STR_PAD_LEFT);
-        $nomorLaporan = $datePrefix . $sequence;
+        $nomorLaporan = $datePrefix . '-' . $sequence;
 
         return [
             'user_id' => User::where('role', 'user')->inRandomOrder()->first()?->id ?? User::factory(),
-            'nomor_laporan' => $nomorLaporan,
+            'nomor_laporan' => 'LP-' . $nomorLaporan,
             'judul_laporan' => fake()->randomElement($judulLaporan) . ' di Desa ' . fake()->randomElement($desaMadukara),
             'lokasi_detail' => 'RT 0' . fake()->numberBetween(1, 5) . ' RW 0' . fake()->numberBetween(1, 3) . ', Desa ' . fake()->randomElement($desaMadukara) . ', Kec. Madukara',
             'latitude' => fake()->latitude(-7.40, -7.38), 
