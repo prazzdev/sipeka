@@ -26,6 +26,7 @@ return new class extends Migration
             $table->text('alasan_ditolak')->nullable();
             $table->integer('total_upvote')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

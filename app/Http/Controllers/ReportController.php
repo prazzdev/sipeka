@@ -61,9 +61,9 @@ class ReportController extends Controller
             }
 
             // GENERATE NOMOR LAPORAN
-            $today = now()->format('Ymd');
+            $today = now()->format('ymd');
             $count = Report::whereDate('created_at', now())->count() + 1;
-            $nomorLaporan = "LP-" . $today . "-" . str_pad($count, 3, '0', STR_PAD_LEFT);
+            $nomorLaporan = $today . str_pad($count, 3, '0', STR_PAD_LEFT);
 
             $report = Report::create([
                 'user_id' => auth()->id(),
@@ -219,17 +219,23 @@ class ReportController extends Controller
             $path = $request->file('foto_tanggapan')->store('tanggapan-admin', 'public');
         }
 
-        // Menggunakan DB Transaction agar aman
         \DB::transaction(function () use ($request, $report, $path) {
-            // 1. Update status laporan
-            $report->update([
-                'status' => $request->status
-            ]);
+            // 1. Update status laporan DAN isi kolom alasan_ditolak jika statusnya 'ditolak'
+            $updateData = ['status' => $request->status];
+            
+            if ($request->status === 'ditolak') {
+                $updateData['alasan_ditolak'] = $request->pesan;
+            } else {
+                // Jika sebelumnya ditolak lalu diubah jadi diverifikasi, hapus alasan penolakannya
+                $updateData['alasan_ditolak'] = null;
+            }
 
-            // 2. Buat tanggapan/histori
+            $report->update($updateData);
+
+            // 2. Buat histori/tanggapan (agar muncul di timeline)
             $report->comments()->create([
                 'user_id' => auth()->id(),
-                'pesan' => $request->pesan,
+                'pesan' => $request->status === 'ditolak' ? "[LAPORAN DITOLAK] " . $request->pesan : $request->pesan,
                 'status' => $request->status,
                 'foto_tanggapan' => $path, 
             ]);
@@ -318,19 +324,24 @@ class ReportController extends Controller
 
     public function destroy(Report $report)
     {
-        // Proteksi: Hanya pemilik laporan atau admin yang boleh menghapus
+        // Proteksi: Hanya pemilik laporan (jika masih menunggu) atau admin yang boleh menghapus
         if (auth()->id() !== $report->user_id && auth()->user()->role !== 'admin') {
             abort(403, 'Anda tidak memiliki otoritas.');
         }
 
-        // Hapus file foto dari folder storage agar tidak menumpuk sampah
-        if ($report->foto_jalan) {
-            Storage::disk('public')->delete($report->foto_jalan);
+        // Opsi tambahan: Admin tidak boleh menghapus laporan yang sudah selesai/diproses
+        if (auth()->user()->role === 'admin' && in_array($report->status, ['diproses', 'selesai'])) {
+            return redirect()->back()->with('error', 'Laporan yang sedang diproses atau selesai tidak dapat diarsipkan.');
         }
 
-        $report->delete();
+        // Karena menggunakan SoftDeletes, kita TIDAK menghapus file di storage dulu
+        // agar data tetap utuh jika sewaktu-waktu di-restore oleh developer.
+        $report->delete(); 
 
-        return redirect()->route('beranda')->with('message', 'Laporan berhasil dihapus.');
+        // Jika yang menghapus admin, arahkan ke dashboard, jika user arahkan ke beranda
+        $redirectRoute = auth()->user()->role === 'admin' ? 'admin.dashboard' : 'beranda';
+
+        return redirect()->route($redirectRoute)->with('message', 'Laporan berhasil diarsipkan.');
     }
 
     public function myReports()

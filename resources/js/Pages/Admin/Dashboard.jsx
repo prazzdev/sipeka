@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer, Edit2, Search } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, HardHat, Eye, ExternalLink, Printer, Edit2, Search, Trash2 } from 'lucide-react';
 import Modal from '@/Components/Modal';
 import { getStatusStyle } from '@/Helpers/getStatusStyle';
 import { StatCard } from '@/Components/Fragments/StatCard';
+import Swal from 'sweetalert2';
 
 export default function Dashboard({ auth, reports, stats, filters}) {
     const { data, setData, post, processing, reset, errors, patch } = useForm({
@@ -62,6 +63,22 @@ export default function Dashboard({ auth, reports, stats, filters}) {
             },
         });
     };
+
+    const confirmDelete = (id) => {
+        Swal.fire({
+            title: 'Arsip Laporan?',
+            text: "Laporan akan disembunyikan dari publik namun tetap tersimpan di database.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Arsipkan!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route('laporan.destroy', id));
+            }
+        })
+    }
 
     return (
         <AuthenticatedLayout
@@ -323,6 +340,14 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                         >
                                                             <Edit2 size={18} />
                                                         </Link>
+
+                                                        <button
+                                                            onClick={() => confirmDelete(report.id)}
+                                                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                                                            title="Hapus/Arsip Laporan"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
                                                         
                                                         <button
                                                             onClick={() => openModal(report)}

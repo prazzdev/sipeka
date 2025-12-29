@@ -38,19 +38,22 @@ class ReportFactory extends Factory
         $createdAt = fake()->dateTimeBetween('-2 months', 'now');
         $datePrefix = $createdAt->format('ymd');
 
-        // LOGIKA URUTAN: Menggunakan array statis agar tidak tabrakan
+        // LOGIKA URUTAN: Menggunakan array statis agar tidak tabrakan per tanggal
         if (!isset(self::$sequences[$datePrefix])) {
             self::$sequences[$datePrefix] = 1;
         } else {
             self::$sequences[$datePrefix]++;
         }
 
-        $sequence = str_pad(self::$sequences[$datePrefix], 2, '0', STR_PAD_LEFT);
-        $nomorLaporan = $datePrefix . '-' . $sequence;
+        // Ubah angka 2 menjadi 3 agar menghasilkan 001, 002, dst.
+        $sequence = str_pad(self::$sequences[$datePrefix], 3, '0', STR_PAD_LEFT);
+
+        // Hasil gabungan: 250101001
+        $nomorLaporan = $datePrefix . $sequence;
 
         return [
             'user_id' => User::where('role', 'user')->inRandomOrder()->first()?->id ?? User::factory(),
-            'nomor_laporan' => 'LP-' . $nomorLaporan,
+            'nomor_laporan' => $nomorLaporan,
             'judul_laporan' => fake()->randomElement($judulLaporan) . ' di Desa ' . fake()->randomElement($desaMadukara),
             'lokasi_detail' => 'RT 0' . fake()->numberBetween(1, 5) . ' RW 0' . fake()->numberBetween(1, 3) . ', Desa ' . fake()->randomElement($desaMadukara) . ', Kec. Madukara',
             'latitude' => fake()->latitude(-7.40, -7.38), 
