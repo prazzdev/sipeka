@@ -12,17 +12,24 @@ class ReportController extends Controller
 {
     public function index(Request $request) 
     {
-        $query = Report::with(['user', 'comments']) // Pastikan load comments untuk timeline
+        $query = Report::with(['user', 'comments'])
             ->withExists(['upvotes as upvoted' => function($query) {
                 $query->where('user_id', auth()->id());
             }]);
 
-        // Logika Filter Sorting
+        // 1. Logika Pencarian (Search)
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('judul_laporan', 'like', "%{$request->search}%")
+                ->orWhere('lokasi_detail', 'like', "%{$request->search}%")
+                ->orWhere('nomor_laporan', 'like', "%{$request->search}%");
+            });
+        }
+
+        // 2. Logika Sorting
         if ($request->sort === 'populer') {
-            // Urutkan berdasarkan total_upvote terbanyak
             $query->orderBy('total_upvote', 'desc');
         } else {
-            // Default: Terbaru (Gunakan latest() di sini saja)
             $query->latest();
         }
 
@@ -30,7 +37,8 @@ class ReportController extends Controller
 
         return Inertia::render('User/Beranda', [
             'reports' => $reports,
-            'filters' => $request->only(['sort']) 
+            // Pastikan search dikirim balik ke frontend agar input tetap terisi
+            'filters' => $request->only(['sort', 'search']) 
         ]);
     }
     // Menyimpan laporan baru ke database
