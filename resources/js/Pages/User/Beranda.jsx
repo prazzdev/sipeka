@@ -1,18 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Tambah useState & useEffect
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PostCard from '@/Components/Sipeka/PostCard';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Clock, TrendingUp, Search, X } from 'lucide-react'; // Tambah Search & X
+import { Clock, TrendingUp, Search, X, ArrowUp } from 'lucide-react'; // Tambah ArrowUp
 
 export default function Beranda({ auth, reports, filters }) {
     const { processing } = usePage();
+    const [showTopBtn, setShowTopBtn] = useState(false); // State untuk kontrol tombol
+
+    // Logika monitoring scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 400) {
+                setShowTopBtn(true);
+            } else {
+                setShowTopBtn(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Fungsi scroll ke atas
+    const goToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+    };
 
     // Fungsi untuk handle pencarian
     const handleSearch = (e) => {
         e.preventDefault();
         const value = e.target.search.value;
         router.get(route('beranda'), 
-            { ...filters, search: value }, // Gabungkan dengan filter sort yang ada
+            { ...filters, search: value }, 
             { preserveState: true, replace: true, preserveScroll: true }
         );
     };
@@ -20,7 +43,7 @@ export default function Beranda({ auth, reports, filters }) {
     // Fungsi untuk handle sort
     const handleSort = (type) => {
         router.get(route('beranda'), 
-            { ...filters, sort: type }, // Gabungkan dengan filter search yang ada
+            { ...filters, sort: type }, 
             { preserveState: true, preserveScroll: true, replace: true }
         );
     };
@@ -36,7 +59,7 @@ export default function Beranda({ auth, reports, filters }) {
         >
             <Head title="Beranda" />
 
-            <div className="py-8">
+            <div className="py-8 relative">
                 <div className="max-w-2xl mx-auto sm:px-6 lg:px-8">
                     
                     {/* Tombol Lapor Cepat */}
@@ -146,6 +169,17 @@ export default function Beranda({ auth, reports, filters }) {
                         ))}
                     </div>
                 </div>
+
+                {/* Tombol Go To Top */}
+                <button
+                    onClick={goToTop}
+                    className={`fixed bottom-8 right-8 p-3 bg-blue-900 text-white rounded-full shadow-2xl transition-all duration-300 z-50 hover:bg-blue-800 ${
+                        showTopBtn ? 'opacity-100 scale-100' : 'opacity-0 scale-0 pointer-events-none'
+                    }`}
+                    title="Kembali ke atas"
+                >
+                    <ArrowUp size={24} />
+                </button>
             </div>
         </AuthenticatedLayout>
     );
