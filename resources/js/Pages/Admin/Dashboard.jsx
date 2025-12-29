@@ -182,14 +182,22 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                         
                         {/* Kolom Search (Kiri) */}
                         <div className="relative w-full md:w-64">
-                            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                            <input 
-                                type="text"
-                                placeholder="Cari laporan..."
-                                defaultValue={filters.search}
-                                onBlur={(e) => handleFilterChange('search', e.target.value)}
-                                className="pl-10 w-full rounded-lg border-gray-300 text-sm focus:ring-blue-900"
-                            />
+                            {/* Gunakan form agar tombol Enter otomatis berfungsi */}
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                handleFilterChange('search', e.target.search.value);
+                            }}>
+                                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                                <input 
+                                    name="search" // Tambahkan name agar mudah diambil saat submit
+                                    type="text"
+                                    placeholder="Cari laporan..."
+                                    defaultValue={filters.search}
+                                    // Tetap gunakan onBlur agar jika admin klik keluar, pencarian tetap jalan
+                                    onBlur={(e) => handleFilterChange('search', e.target.value)}
+                                    className="pl-10 w-full rounded-lg border-gray-200 text-sm focus:ring-blue-900 focus:border-blue-900 transition"
+                                />
+                            </form>
                         </div>
 
                         {/* Dropdown Filters (Tengah) */}
