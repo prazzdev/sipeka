@@ -42,6 +42,11 @@ Route::middleware('auth')->group(function () {
 
     // Halaman Peta
     Route::get('/peta', [ReportController::class, 'map'])->name('peta.index');
+
+    // Halaman Langkah Melapor
+    Route::get('/langkah-melapor', function () {
+        return Inertia::render('User/LangkahMelapor');
+    })->name('laporan.langkah');
 });
 
 // Route khusus Admin & Kadis

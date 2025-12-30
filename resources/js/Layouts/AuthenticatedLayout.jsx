@@ -179,6 +179,9 @@ export default function AuthenticatedLayout({ header, children }) {
                             <ResponsiveNavLink href={route('laporan.saya')} active={route().current('laporan.saya')}>
                                 Laporan Saya
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink href={route('laporan.langkah')} active={route().current('laporan.langkah')}>
+                                Cara Membuat Laporan
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink href={route('laporan.create')} active={route().current('laporan.create')}>
                                 Buat Laporan
                             </ResponsiveNavLink>
