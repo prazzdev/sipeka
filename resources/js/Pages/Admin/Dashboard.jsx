@@ -341,6 +341,12 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex items-center justify-center space-x-2">
+                                                        <button
+                                                            onClick={() => openModal(report)}
+                                                            className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-800 transition text-sm"
+                                                        >
+                                                            Tanggapi
+                                                        </button>
                                                         <Link 
                                                             href={route('laporan.show', report.id)} 
                                                             className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
@@ -365,12 +371,6 @@ export default function Dashboard({ auth, reports, stats, filters}) {
                                                             <Trash2 size={18} />
                                                         </button>
                                                         
-                                                        <button
-                                                            onClick={() => openModal(report)}
-                                                            className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-800 transition text-sm"
-                                                        >
-                                                            Tanggapi
-                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
