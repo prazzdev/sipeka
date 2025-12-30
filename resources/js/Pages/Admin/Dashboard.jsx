@@ -60,7 +60,23 @@ export default function Dashboard({ auth, reports, stats, filters}) {
             onSuccess: () => {
                 closeModal();
                 reset();
+                // Tambahkan Swal di sini
+                Swal.fire({
+                    title: 'Tanggapan Terkirim!',
+                    text: 'Status laporan berhasil diperbarui dan tanggapan telah diterbitkan.',
+                    icon: 'success',
+                    confirmButtonColor: '#1e3a8a',
+                    timer: 3000, // Otomatis tutup dalam 3 detik
+                });
             },
+            onError: () => {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan saat memperbarui status. Pastikan semua form terisi.',
+                    icon: 'error',
+                    confirmButtonColor: '#1e3a8a',
+                });
+            }
         });
     };
 
