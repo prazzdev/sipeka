@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Tambah useEffect
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import Swal from 'sweetalert2';
-import { Camera, MapPin, Loader2, Map as MapIcon, X } from 'lucide-react';
+import { Camera, MapPin, Loader2, Map as MapIcon, X, Info, Search } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -31,7 +31,37 @@ export default function CreateReport({ auth }) {
     const [showMap, setShowMap] = useState(false);
     const centerMadukara = [-7.3891, 109.7185];
 
-    // Komponen internal untuk menangani klik pada peta
+    // MODAL QUICK TIPS (Muncul saat halaman dimuat)
+    useEffect(() => {
+        Swal.fire({
+            title: '<span class="text-blue-900 font-black">Tips Melapor</span>',
+            html: `
+                <div class="text-left space-y-4 p-2">
+                    <div class="flex gap-3 items-start">
+                        <div class="bg-blue-100 p-2 rounded-lg text-blue-900">🔍</div>
+                        <p class="text-sm text-gray-600">Pastikan Anda sudah mengecek <b>Beranda</b> untuk memastikan jalan ini belum dilaporkan.</p>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <div class="bg-yellow-100 p-2 rounded-lg text-yellow-900">📸</div>
+                        <p class="text-sm text-gray-600">Gunakan foto asli kerusakan di lokasi agar admin mudah memverifikasi.</p>
+                    </div>
+                    <div class="flex gap-3 items-start">
+                        <div class="bg-red-100 p-2 rounded-lg text-red-900">📍</div>
+                        <p class="text-sm text-gray-600">Gunakan fitur GPS atau pilih titik di peta agar lokasi perbaikan akurat.</p>
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'Saya Mengerti',
+            confirmButtonColor: '#1e3a8a',
+            allowOutsideClick: false,
+            showCloseButton: true,
+            customClass: {
+                popup: 'rounded-3xl',
+                confirmButton: 'rounded-xl font-bold px-8'
+            }
+        });
+    }, []);
+
     function LocationPicker() {
         useMapEvents({
             click(e) {
@@ -73,7 +103,6 @@ export default function CreateReport({ auth }) {
         post(route('laporan.store'), {
             forceFormData: true,
             onSuccess: () => {
-                // Munculkan Alert Sukses
                 Swal.fire({
                     title: 'Berhasil!',
                     text: 'Laporan Anda telah terkirim dan akan segera diverifikasi oleh admin.',
@@ -81,7 +110,6 @@ export default function CreateReport({ auth }) {
                     confirmButtonText: 'Oke, Mengerti',
                     confirmButtonColor: '#1e3a8a',
                 });
-
                 reset();
             },
             onError: () => {
@@ -91,12 +119,6 @@ export default function CreateReport({ auth }) {
                     icon: 'error',
                     confirmButtonText: 'Coba Lagi',
                 });
-                // Swal.fire({
-                //     title: 'Gagal!',
-                //     text: err.message || 'Pastikan semua data dan koordinat lokasi sudah terisi.',
-                //     icon: 'error',
-                //     confirmButtonText: 'Cek Kembali',
-                // });
             }
         });
     };
@@ -107,6 +129,14 @@ export default function CreateReport({ auth }) {
 
             <div className="py-12 px-4">
                 <div className="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    {/* Info Tambahan di Atas Form */}
+                    <div className="mb-8 flex gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <Info className="text-blue-600 flex-shrink-0" size={20} />
+                        <p className="text-[12px] text-blue-800 leading-relaxed">
+                            Laporan yang lengkap memudahkan pemerintah melakukan perbaikan lebih cepat. Pastikan foto dan lokasi GPS akurat.
+                        </p>
+                    </div>
+
                     <form onSubmit={submit} className="space-y-6">
                         
                         {/* Judul Laporan */}
@@ -137,8 +167,8 @@ export default function CreateReport({ auth }) {
                                         <div className="flex text-sm text-gray-600">
                                             <input 
                                                 type="file" 
-                                                accept="image/*"
                                                 className="absolute inset-0 opacity-0 cursor-pointer"
+                                                accept="image/*"
                                                 onChange={e => setData('foto_jalan', e.target.files[0])}
                                             />
                                             <span className="text-blue-600 font-bold">Pilih foto</span>
@@ -175,9 +205,6 @@ export default function CreateReport({ auth }) {
                                 onChange={e => setData('deskripsi', e.target.value)}
                             ></textarea>
                             {errors.deskripsi && <div className="text-red-500 text-xs mt-1">{errors.deskripsi}</div>}
-                            <p className="mt-1 text-[10px] text-gray-400">
-                                Informasi tambahan membantu admin memprioritaskan perbaikan.
-                            </p>
                         </div>
 
                         {/* Bagian GPS & Map Picker */}
@@ -204,7 +231,6 @@ export default function CreateReport({ auth }) {
                                 </button>
                             </div>
 
-                            {/* Map Picker Area */}
                             {showMap && (
                                 <div className="h-64 w-full rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner mt-2">
                                     <MapContainer center={centerMadukara} zoom={13} style={{ height: '100%', width: '100%' }}>
@@ -215,7 +241,6 @@ export default function CreateReport({ auth }) {
                                 </div>
                             )}
 
-                            {/* Info Koordinat */}
                             <div className="flex justify-between p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-[10px] text-gray-500 font-mono tracking-tighter">
                                 <span>LAT: {data.latitude || 'BELUM DISET'}</span>
                                 <span>LONG: {data.longitude || 'BELUM DISET'}</span>
