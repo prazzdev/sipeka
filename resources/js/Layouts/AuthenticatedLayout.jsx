@@ -22,21 +22,32 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            {/* PENYESUAIAN: 
+                            1. Mengubah space-x-8 menjadi space-x-2 karena NavLink sudah punya padding internal.
+                            2. Menambahkan items-center agar bentuk 'pill' NavLink sejajar di tengah bar.
+                            */}
+                            <div className="hidden space-x-2 sm:-my-px sm:ms-10 sm:flex items-center">
                                 <NavLink href={route('beranda')} active={route().current('beranda')}>
                                     Beranda
                                 </NavLink>
                                 <NavLink href={route('peta.index')} active={route().current('peta.index')}>
                                     Peta Kerusakan
                                 </NavLink>
+                                <NavLink href={route('laporan.saya')} active={route().current('laporan.saya')}>
+                                    Laporan Saya
+                                </NavLink>
+                                <NavLink href={route('laporan.langkah')} active={route().current('laporan.langkah')}>
+                                    Cara Melapor
+                                </NavLink>
                                 <NavLink href={route('laporan.create')} active={route().current('laporan.create')}>
                                     Buat Laporan
                                 </NavLink>
+                                
                                 {(user?.role === 'admin' || user?.role === 'kadis') && (
                                     <NavLink 
                                         href={route('admin.dashboard')} 
                                         active={route().current('admin.dashboard')}
-                                        className="text-red-600 font-bold"
+                                        className="text-red-600 font-bold hover:bg-red-50" // Tambah hover khusus admin
                                     >
                                         Dashboard Admin
                                     </NavLink>
@@ -47,17 +58,16 @@ export default function AuthenticatedLayout({ header, children }) {
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
                             <Dropdown>
                                 <Dropdown.Trigger>
-                                    <button className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition hover:text-gray-700 focus:outline-none">
+                                    <button className="inline-flex items-center rounded-xl border border-transparent bg-gray-50 px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-gray-100 focus:outline-none">
                                         {user.name}
-                                        <svg className="-me-0.5 ms-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg className="-me-0.5 ms-2 h-4 w-4 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                                         </svg>
                                     </button>
                                 </Dropdown.Trigger>
                                 <Dropdown.Content>
-                                    <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
-                                    <Dropdown.Link href={route('laporan.saya')}>Laporan Saya</Dropdown.Link>
-                                    <Dropdown.Link href={route('logout')} method="post" as="button">Log Out</Dropdown.Link>
+                                    <Dropdown.Link href={route('profile.edit')}>Edit Profil</Dropdown.Link>
+                                    <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-600 font-bold">Log Out</Dropdown.Link>
                                 </Dropdown.Content>
                             </Dropdown>
                         </div>
