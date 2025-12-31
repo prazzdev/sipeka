@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  @keyframes shake-animation {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(-2px); }
+    20% { transform: translateX(2px); }
+    30% { transform: translateX(-2px); }
+    40% { transform: translateX(2px); }
+    50% { transform: translateX(0); }
+    100% { transform: translateX(0); }
+  }
+
+  .animate-shake {
+    animation: shake-animation 1.5s ease-in-out infinite;
+  }
+}
