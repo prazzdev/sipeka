@@ -4,6 +4,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { UserPlus, User, Mail, Lock, CheckCircle2 } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -18,6 +19,22 @@ export default function Register() {
 
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
+            onSuccess: () => {
+                Swal.fire({
+                    title: 'Pendaftaran Berhasil!',
+                    text: 'Akun Anda telah dibuat. Silakan mulai gunakan SIPEKA.',
+                    icon: 'success',
+                    confirmButtonColor: '#1e3a8a',
+                });
+            },
+            onError: () => {
+                Swal.fire({
+                    title: 'Gagal Mendaftar!',
+                    text: 'Pastikan data yang Anda isi sudah benar sesuai ketentuan.',
+                    icon: 'error',
+                    confirmButtonColor: '#1e3a8a',
+                });
+            }
         });
     };
 
