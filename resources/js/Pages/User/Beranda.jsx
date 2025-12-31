@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'; // Tambah useState & useEffect
+import React, { useState, useEffect } from 'react'; 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PostCard from '@/Components/Sipeka/PostCard';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Clock, TrendingUp, Search, X, ArrowUp } from 'lucide-react'; // Tambah ArrowUp
+import { Clock, TrendingUp, Search, X, ArrowUp } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function Beranda({ auth, reports, filters }) {
     const { processing } = usePage();
-    const [showTopBtn, setShowTopBtn] = useState(false); // State untuk kontrol tombol
+    const [showTopBtn, setShowTopBtn] = useState(false);
 
     // Logika monitoring scroll
     useEffect(() => {
@@ -22,7 +23,6 @@ export default function Beranda({ auth, reports, filters }) {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Fungsi scroll ke atas
     const goToTop = () => {
         window.scrollTo({
             top: 0,
@@ -30,7 +30,6 @@ export default function Beranda({ auth, reports, filters }) {
         });
     };
 
-    // Fungsi untuk handle pencarian
     const handleSearch = (e) => {
         e.preventDefault();
         const value = e.target.search.value;
@@ -40,7 +39,6 @@ export default function Beranda({ auth, reports, filters }) {
         );
     };
 
-    // Fungsi untuk handle sort
     const handleSort = (type) => {
         router.get(route('beranda'), 
             { ...filters, sort: type }, 
@@ -76,7 +74,7 @@ export default function Beranda({ auth, reports, filters }) {
                         </Link>
                     </div>
 
-                    {/* Fitur Search Baru */}
+                    {/* Fitur Search */}
                     <div className="mb-8">
                         <form onSubmit={handleSearch} className="relative group">
                             <Search className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-900 transition-colors" size={20} />

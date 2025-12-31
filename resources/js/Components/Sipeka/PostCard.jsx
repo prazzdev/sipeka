@@ -10,6 +10,7 @@ import { MapPin,
     ExternalLink,
     Trash2, 
     Edit } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function PostCard({ report, auth }) {
     const { post, processing } = useForm();
@@ -21,6 +22,23 @@ export default function PostCard({ report, auth }) {
     const handleUpvote = () => {
         post(route('upvote.toggle', report?.id), {
             preserveScroll: true,
+            onSuccess: () => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'bottom-end', // Diubah ke bawah agar tidak tertutup Navbar
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.style.zIndex = '9999';
+                    }
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Dukungan diperbarui'
+                });
+            },
         });
     };
 
@@ -157,33 +175,37 @@ export default function PostCard({ report, auth }) {
                 </p>
 
                 {/* Footer Action */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100 gap-2">
                     <button 
                         onClick={handleUpvote}
                         disabled={processing}
-                        className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
+                        className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-xl transition-all active:scale-95 whitespace-nowrap ${
                             report.upvoted ? 'bg-yellow-100 text-yellow-600' : 'text-gray-700 hover:bg-gray-100'
                         }`}
                     >
                         <ArrowBigUp 
-                            size={24} 
+                            size={22} 
                             className={report.upvoted ? 'fill-current' : ''} 
                         />
-                        <span className="font-bold">{report.total_upvote} Upvotes</span>
+                        {/* Mobile: text-xs (12px), Desktop: text-sm (14px) */}
+                        <span className="font-bold text-xs sm:text-sm tracking-tight">
+                            {report.total_upvote} warga mendukung perbaikan
+                        </span>
                     </button>
+
                     <button 
                         onClick={handleShare}
-                        className="flex items-center space-x-1 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+                        className="flex flex-shrink-0 items-center space-x-1.5 px-3 py-2 rounded-xl text-gray-700 hover:bg-gray-100 transition-all active:scale-95"
                     >
                         {copied ? (
                             <>
-                                <Check size={20} className="text-green-500" />
-                                <span className="text-xs font-bold text-green-500">Tersalin!</span>
+                                <Check size={18} className="text-green-500" />
+                                <span className="text-xs sm:text-sm font-bold text-green-500">Tersalin!</span>
                             </>
                         ) : (
                             <>
-                                <Share2 size={20} />
-                                <span className="text-xs font-bold">Bagikan</span>
+                                <Share2 size={18} />
+                                <span className="text-xs sm:text-sm font-bold">Bagikan</span>
                             </>
                         )}
                     </button>
