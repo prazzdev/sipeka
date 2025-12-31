@@ -1,9 +1,21 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { MapPin, ShieldCheck, MessageSquare, BarChart3, ArrowRight } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function LandingPage({ canLogin, canRegister, auth }) {
+    // Ambil server_time dari props yang dikirim middleware
+    const { server_time } = usePage().props;
+    const [loadTime, setLoadTime] = useState(0);
+
+    useEffect(() => {
+        // Menghitung selisih waktu saat komponen React selesai dimuat
+        const now = new Date().getTime();
+        // server_time dikirim dalam milidetik dari PHP microtime
+        const diff = Math.abs((now - server_time) / 1000); 
+        setLoadTime(diff.toFixed(3));
+    }, [server_time]);
+
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900">
             <Head title="SIPEKA - Sistem Pelaporan Kerusakan Jalan" />
@@ -11,10 +23,6 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
             {/* Navbar */}
             <nav className="flex items-center justify-between px-4 md:px-8 py-4 md:py-6 max-w-7xl mx-auto relative z-50">
                 <div className="flex items-center gap-2">
-                    {/* <div className="bg-blue-900 p-1.5 md:p-2 rounded-lg">
-                        <MapPin className="text-yellow-400 w-5 h-5 md:w-6 md:h-6" />
-                    </div> */}
-                    {/* <span className="text-xl md:text-2xl font-black tracking-tighter text-blue-900">SIPEKA</span> */}
                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                 </div>
 
@@ -59,9 +67,6 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                         </span>
                         <span className="text-sm font-bold text-blue-900 uppercase tracking-widest">Kecamatan Madukara</span>
                     </div>
-                    {/* <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
-                        Suarakan Kerusakan, <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">Wujudkan</span> Jalan Mulus.
-                    </h1> */}
                     <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
                         Sistem Informasi Pelaporan <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">Kerusakan Jalan</span>.
                     </h1>
@@ -99,7 +104,6 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                 <div className="relative">
                     <div className="absolute -inset-4 bg-yellow-400 rounded-[2rem] rotate-3 opacity-20"></div>
                     <div className="relative bg-gray-900 rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 h-[500px]">
-                        {/* Di sini bisa Anda ganti dengan screenshot aplikasi / Peta Anda */}
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-black/40 flex items-center justify-center p-12 text-center">
                             <div className="space-y-4">
                                 <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
@@ -135,11 +139,59 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-12 border-t border-gray-100 text-center">
-                <p className="text-gray-400 text-sm">
-                    &copy; 2025 SIPEKA Madukara. Projek Skripsi Teknik Informatika.
-                </p>
+            {/* Footer Baru */}
+            <footer className="bg-gray-50 border-t border-gray-100 pt-16 pb-8">
+                <div className="max-w-7xl mx-auto px-6 md:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                        
+                        {/* Kolom 1: Branding & Deskripsi */}
+                        <div className="space-y-4 text-center md:text-left">
+                            <ApplicationLogo className="h-10 w-auto fill-current text-blue-900 mx-auto md:mx-0" />
+                            <p className="text-gray-500 text-sm leading-relaxed">
+                                Platform digital pelaporan kerusakan jalan untuk transparansi 
+                                dan percepatan pembangunan infrastruktur di wilayah Kecamatan Madukara.
+                            </p>
+                        </div>
+
+                        {/* Kolom 2: Tautan Cepat */}
+                        <div className="text-center md:text-left">
+                            <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">Navigasi</h4>
+                            <ul className="space-y-2 text-sm text-gray-600 font-bold">
+                                <li><Link href={route('peta.index')} className="hover:text-blue-900 transition">Peta Kerusakan</Link></li>
+                                <li><Link href={route('laporan.langkah')} className="hover:text-blue-900 transition">Panduan Melapor</Link></li>
+                                <li><Link href={route('login')} className="hover:text-blue-900 transition">Masuk ke Sistem</Link></li>
+                            </ul>
+                        </div>
+
+                        {/* Kolom 3: Info Instansi / Kontak */}
+                        <div className="text-center md:text-left">
+                            <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">Lokasi Pelayanan</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                                Jl. May.Jend. Panjaitan No. 8<br />
+                                Telp. (0286) 591011 Fak. 591298<br />
+                                Banjarnegara, Jawa Tengah
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Baris Paling Bawah dengan Load Time */}
+                    <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="flex flex-col items-center md:items-start gap-1">
+                            <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                                &copy; 2025 SIPEKA Madukara. Projek Skripsi Teknik Informatika.
+                            </p>
+                            {/* WAKTU LOAD HALAMAN */}
+                            <p className="text-[9px] text-gray-300 font-mono italic">
+                                Response Time: {loadTime}s
+                            </p>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-900 font-black text-[10px]">TI</div>
+                            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-700 font-black text-[10px]">GIS</div>
+                        </div>
+                    </div>
+                </div>
             </footer>
         </div>
     );

@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'server_time' => microtime(true) * 1000,
         ];
     }
 }

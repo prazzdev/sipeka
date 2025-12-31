@@ -2,15 +2,24 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Home, Map, PlusCircle, User, LayoutDashboard, Info, ListChecks, LogOut, Menu, X } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
+    const { server_time } = usePage().props; // Ambil server_time dari props
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [loadTime, setLoadTime] = useState(0);
+
+    useEffect(() => {
+        // Menghitung selisih waktu saat komponen React selesai dimuat
+        const now = new Date().getTime();
+        const diff = Math.abs((now - server_time) / 1000);
+        setLoadTime(diff.toFixed(3));
+    }, [server_time]);
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 sm:pb-0">
+        <div className="min-h-screen bg-gray-50 pb-20 sm:pb-0 flex flex-col">
             {/* Desktop Navbar */}
             <nav className="hidden sm:block border-b border-gray-100 bg-white sticky top-0 z-40">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -22,10 +31,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            {/* PENYESUAIAN: 
-                            1. Mengubah space-x-8 menjadi space-x-2 karena NavLink sudah punya padding internal.
-                            2. Menambahkan items-center agar bentuk 'pill' NavLink sejajar di tengah bar.
-                            */}
                             <div className="hidden space-x-2 sm:-my-px sm:ms-10 sm:flex items-center">
                                 <NavLink href={route('beranda')} active={route().current('beranda')}>
                                     Beranda
@@ -47,7 +52,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <NavLink 
                                         href={route('admin.dashboard')} 
                                         active={route().current('admin.dashboard')}
-                                        className="text-red-600 font-bold hover:bg-red-50" // Tambah hover khusus admin
+                                        className="text-red-600 font-bold hover:bg-red-50"
                                     >
                                         Dashboard Admin
                                     </NavLink>
@@ -158,11 +163,21 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             {/* Main Content */}
-            <main className="py-6">
+            <main className="py-6 flex-grow">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     {children}
                 </div>
             </main>
+
+            {/* Response Time Footer (Hanya muncul di Desktop agar tidak menumpuk di Mobile Tab Bar) */}
+            <footer className="hidden sm:block py-4 border-t border-gray-200">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex justify-between items-center text-[10px] text-gray-400 font-mono uppercase tracking-widest">
+                    <span>SIPEKA MADUKARA v1.0</span>
+                    <span className="italic underline underline-offset-4 decoration-blue-200">
+                        Response Time: {loadTime}s
+                    </span>
+                </div>
+            </footer>
         </div>
     );
 }
