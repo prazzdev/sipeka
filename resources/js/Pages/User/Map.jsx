@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Maximize2, X, MapPin } from 'lucide-react'; // Tambahan ikon
 import L from 'leaflet';
 
 const createCustomIcon = (status) => {
@@ -24,6 +25,7 @@ const createCustomIcon = (status) => {
 
 export default function MapPage({ auth, reports, filters }) {
     const centerMadukara = [-7.3891, 109.7185];
+    const [isMapFullscreen, setIsMapFullscreen] = useState(false); // State Fullscreen
 
     // State untuk filter lokal
     const [filterData, setFilterData] = useState({
@@ -44,7 +46,7 @@ export default function MapPage({ auth, reports, filters }) {
         });
     };
 
-    // Logika Jam Real-time (seperti sebelumnya)
+    // Logika Jam Real-time
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -53,7 +55,7 @@ export default function MapPage({ auth, reports, filters }) {
 
     // Opsi Bulan & Tahun
     const months = [
-        { v: 'all', l: 'Semua Bulan' }, // Opsi baru
+        { v: 'all', l: 'Semua Bulan' },
         { v: '01', l: 'Januari' }, { v: '02', l: 'Februari' }, { v: '03', l: 'Maret' },
         { v: '04', l: 'April' }, { v: '05', l: 'Mei' }, { v: '06', l: 'Juni' },
         { v: '07', l: 'Juli' }, { v: '08', l: 'Agustus' }, { v: '09', l: 'September' },
@@ -131,8 +133,9 @@ export default function MapPage({ auth, reports, filters }) {
                             <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
                         </div>
                     </div>
-                    {/* Map */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200">
+
+                    {/* Map Container Wrapper */}
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 relative group">
                         <div style={{ height: '70vh', width: '100%' }}>
                             <MapContainer 
                                 center={centerMadukara} 
@@ -175,7 +178,70 @@ export default function MapPage({ auth, reports, filters }) {
                                 ))}
                             </MapContainer>
                         </div>
+
+                        {/* Tombol Perbesar Floating */}
+                        <button 
+                            type="button"
+                            onClick={() => setIsMapFullscreen(true)}
+                            className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 text-blue-900 hover:bg-white active:scale-90 transition-all z-[400]"
+                            title="Perbesar Peta"
+                        >
+                            <Maximize2 size={18} />
+                        </button>
                     </div>
+
+                    {/* MODAL FULLSCREEN MAP */}
+                    {isMapFullscreen && (
+                        <div className="fixed inset-0 z-[9999] bg-white flex flex-col">
+                            <div className="p-4 flex items-center justify-between bg-blue-900 text-white">
+                                <div className="flex items-center gap-2 font-bold">
+                                    <MapPin size={20} />
+                                    <span>Monitoring Peta Laporan</span>
+                                </div>
+                                <button 
+                                    onClick={() => setIsMapFullscreen(false)}
+                                    className="bg-white/20 p-2 rounded-full hover:bg-white/30 transition"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="flex-1 w-full">
+                                <MapContainer 
+                                    center={centerMadukara} 
+                                    zoom={14} 
+                                    style={{ height: '100%', width: '100%' }}
+                                >
+                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                    {reports.map((report) => (
+                                        <Marker 
+                                            key={`fs-${report.id}`} 
+                                            position={[report.latitude, report.longitude]}
+                                            icon={createCustomIcon(report.status)}
+                                        >
+                                            <Popup>
+                                                <div className="w-48 p-1">
+                                                    <img 
+                                                        src={report.foto_jalan ? `/storage/${report.foto_jalan}` : '/storage/no-image.png'} 
+                                                        className="rounded-lg mb-2 w-full h-24 object-cover" 
+                                                        alt="Foto"
+                                                    />
+                                                    <h3 className="font-bold text-blue-900 text-sm">{report.judul_laporan}</h3>
+                                                    <p className="text-[10px] text-gray-500 mb-2 tracking-tight leading-tight">{report.lokasi_detail}</p>
+                                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded text-white ${
+                                                        report.status === 'selesai' ? 'bg-green-500' :
+                                                        report.status === 'diproses' ? 'bg-orange-500' :
+                                                        report.status === 'ditolak' ? 'bg-red-500' : 'bg-blue-500'
+                                                    }`}>
+                                                        {report.status.toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            </Popup>
+                                        </Marker>
+                                    ))}
+                                </MapContainer>
+                            </div>
+                        </div>
+                    )}
                     
                     {/* Legenda Dinamis */}
                     <div className="mt-4 grid grid-cols-2 md:flex md:flex-wrap gap-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
