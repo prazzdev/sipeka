@@ -261,67 +261,6 @@ export default function DetailReport({ auth, report }) {
                             );
                         })}
                     </div>
-
-                    {(auth.user.role === 'admin' || auth.user.role === 'kadis') && (
-                        <form onSubmit={submitComment} className="mt-4 pt-4 border-t">
-                            <textarea
-                                className="border-gray-300 focus:border-yellow-500 rounded-xl focus:ring-yellow-500 w-full text-sm"
-                                rows="3"
-                                placeholder="Tulis tanggapan resmi dinas..."
-                                value={data.pesan}
-                                onChange={e => setData('pesan', e.target.value)}
-                            ></textarea>
-                            
-                            <div className="mt-4">
-                                <label className="block mb-2 font-bold text-gray-700 text-xs uppercase">
-                                    Sertakan Foto Progres (Opsional)
-                                </label>
-                                
-                                <div className="relative">
-                                    <input 
-                                        type="file" 
-                                        id="foto_tanggapan"
-                                        className="hidden" // Sembunyikan input asli
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                    />
-                                    
-                                    <label 
-                                        htmlFor="foto_tanggapan"
-                                        className="group flex flex-col justify-center items-center bg-gray-50 hover:bg-yellow-50 border-2 border-gray-300 hover:border-yellow-400 border-dashed rounded-xl w-full h-32 transition cursor-pointer"
-                                    >
-                                        {previewImage ? (
-                                            <div className="relative p-2 w-full h-full">
-                                                <img 
-                                                    src={previewImage} 
-                                                    className="rounded-lg w-full h-full object-cover" 
-                                                    alt="Preview" 
-                                                />
-                                                <div className="absolute inset-0 flex justify-center items-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-lg font-bold text-white text-xs transition">
-                                                    Ganti Foto
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col justify-center items-center pt-5 pb-6">
-                                                <Camera className="mb-2 w-8 h-8 text-gray-400 group-hover:text-yellow-500 transition" />
-                                                <p className="font-medium text-gray-500 text-xs">
-                                                    <span className="font-bold text-blue-900">Klik untuk upload</span> atau drag and drop
-                                                </p>
-                                                <p className="mt-1 text-[10px] text-gray-400 uppercase">PNG, JPG (Max 2MB)</p>
-                                            </div>
-                                        )}
-                                    </label>
-                                </div>
-                            </div>
-
-                            <button 
-                                disabled={processing}
-                                className="bg-blue-900 hover:bg-blue-800 mt-2 px-6 py-2 rounded-lg font-bold text-white text-sm transition"
-                            >
-                                Kirim Tanggapan Resmi
-                            </button>
-                        </form>
-                    )}
                 </div>
             </div>
         </AuthenticatedLayout>
