@@ -69,7 +69,7 @@ export default function DetailReport({ auth, report }) {
                         <ChevronLeft size={20} /> Kembali ke Beranda
                     </Link>
 
-                    <div className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden">
+                    <div className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden mb-4">
                         <div className="grid grid-cols-1 md:grid-cols-2">
                             
                             {/* Sisi Kiri: Foto */}
@@ -120,9 +120,16 @@ export default function DetailReport({ auth, report }) {
                                 </div>
 
                                 <div className="flex items-center space-x-4">
-                                    <div className="flex items-center bg-gray-50 px-4 py-2 border border-gray-100 rounded-xl">
-                                        <ArrowBigUp className="mr-2 text-yellow-500" fill={report.upvoted ? "currentColor" : "none"} />
-                                        <span className="font-bold text-lg">{report.total_upvote} Upvotes</span>
+                                    <div className="flex items-center bg-gray-50 px-3 sm:px-4 py-2 border border-gray-100 rounded-xl shadow-sm">
+                                        <ArrowBigUp 
+                                            size={22} 
+                                            className="mr-2 text-yellow-500 flex-shrink-0" 
+                                            fill={report.upvoted ? "currentColor" : "none"} 
+                                        />
+                                        {/* text-[13px] di mobile agar pas satu baris, sm:text-base di desktop */}
+                                        <span className="font-bold text-[13px] sm:text-base text-blue-900 leading-tight tracking-tight sm:tracking-normal">
+                                            {report.total_upvote} warga mendukung perbaikan
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -170,7 +177,7 @@ export default function DetailReport({ auth, report }) {
                     )}
                     
                     {/* Bagian Komentar/Admin Response */}
-                        <h3 className="flex items-center mb-4 font-bold text-blue-900">
+                    <h3 className="flex items-center mb-4 font-bold text-blue-900">
                         Tanggapan Dinas PUPR ({report.comments.length})
                     </h3>
 
