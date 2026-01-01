@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'; // Tambah useEffect
+import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import Swal from 'sweetalert2';
-import { Camera, MapPin, Loader2, Map as MapIcon, X, Info, Search } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { Camera, MapPin, Loader2, Map as MapIcon, X, Info, Search, Maximize2 } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -29,9 +29,10 @@ export default function CreateReport({ auth }) {
     
     const [gettingLocation, setGettingLocation] = useState(false);
     const [showMap, setShowMap] = useState(false);
+    const [isMapFullscreen, setIsMapFullscreen] = useState(false);
     const centerMadukara = [-7.3891, 109.7185];
 
-    // MODAL QUICK TIPS (Muncul saat halaman dimuat)
+    // MODAL QUICK TIPS
     useEffect(() => {
         Swal.fire({
             title: '<span class="text-blue-900 font-black">Tips Melapor</span>',
@@ -61,6 +62,17 @@ export default function CreateReport({ auth }) {
             }
         });
     }, []);
+
+    // KOMPONEN UNTUK AUTO-CENTER MAP
+    function ChangeView({ center }) {
+        const map = useMap();
+        useEffect(() => {
+            if (center[0] && center[1]) {
+                map.setView(center, map.getZoom());
+            }
+        }, [center, map]);
+        return null;
+    }
 
     function LocationPicker() {
         useMapEvents({
@@ -118,6 +130,7 @@ export default function CreateReport({ auth }) {
                     text: 'Pastikan semua form telah terisi dengan benar.',
                     icon: 'error',
                     confirmButtonText: 'Coba Lagi',
+                    confirmButtonColor: '#1e3a8a',
                 });
             }
         });
@@ -129,7 +142,6 @@ export default function CreateReport({ auth }) {
 
             <div className="py-12 px-4">
                 <div className="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                    {/* Info Tambahan di Atas Form */}
                     <div className="mb-8 flex gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
                         <Info className="text-blue-600 flex-shrink-0" size={20} />
                         <p className="text-[12px] text-blue-800 leading-relaxed">
@@ -138,8 +150,6 @@ export default function CreateReport({ auth }) {
                     </div>
 
                     <form onSubmit={submit} className="space-y-6">
-                        
-                        {/* Judul Laporan */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700">Judul Laporan</label>
                             <input 
@@ -152,7 +162,6 @@ export default function CreateReport({ auth }) {
                             {errors.judul_laporan && <div className="text-red-500 text-xs mt-1">{errors.judul_laporan}</div>}
                         </div>
 
-                        {/* Upload Foto */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700">Foto Kerusakan</label>
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-yellow-500 transition relative overflow-hidden">
@@ -179,7 +188,6 @@ export default function CreateReport({ auth }) {
                             </div>
                         </div>
 
-                        {/* Lokasi Detail */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700">Lokasi Detail (Alamat/Patokan)</label>
                             <textarea 
@@ -191,7 +199,6 @@ export default function CreateReport({ auth }) {
                             ></textarea>
                         </div>
 
-                        {/* Deskripsi Lengkap */}
                         <div>
                             <label className="text-sm font-bold text-gray-700 flex justify-between">
                                 <span>Deskripsi Laporan</span>
@@ -207,37 +214,86 @@ export default function CreateReport({ auth }) {
                             {errors.deskripsi && <div className="text-red-500 text-xs mt-1">{errors.deskripsi}</div>}
                         </div>
 
-                        {/* Bagian GPS & Map Picker */}
                         <div className="space-y-3">
-                            <label className="block text-sm font-bold text-gray-700 text-center">Tentukan Lokasi GPS</label>
+                            <label className="block text-sm font-bold text-gray-700 text-center uppercase tracking-tight">Tentukan Lokasi GPS</label>
                             
                             <div className="grid grid-cols-2 gap-3">
                                 <button 
                                     type="button"
                                     onClick={getLocation}
-                                    className="flex items-center justify-center bg-blue-900 text-white py-2.5 rounded-lg text-xs font-bold hover:bg-blue-800 transition"
+                                    className="flex items-center justify-center bg-blue-900 text-white py-2.5 px-2 rounded-lg text-[10px] sm:text-xs font-bold hover:bg-blue-800 transition shadow-sm active:scale-95"
                                 >
-                                    {gettingLocation ? <Loader2 className="animate-spin mr-2" size={16} /> : <MapPin className="mr-2" size={16} />}
-                                    GPS SAAT INI
+                                    {gettingLocation ? <Loader2 className="animate-spin mr-1" size={14} /> : <MapPin className="mr-1" size={14} />}
+                                    <span className="whitespace-nowrap uppercase">GPS Saat Ini</span>
                                 </button>
 
                                 <button 
                                     type="button"
                                     onClick={() => setShowMap(!showMap)}
-                                    className={`flex items-center justify-center py-2.5 rounded-lg text-xs font-bold transition border-2 ${showMap ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-blue-900 text-blue-900'}`}
+                                    className={`flex items-center justify-center py-2.5 px-2 rounded-lg text-[10px] sm:text-xs font-bold transition border-2 active:scale-95 ${showMap ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-blue-900 text-blue-900'}`}
                                 >
-                                    {showMap ? <X className="mr-2" size={16} /> : <MapIcon className="mr-2" size={16} />}
-                                    {showMap ? "TUTUP PETA" : "PILIH DI PETA"}
+                                    {showMap ? <X className="mr-1" size={14} /> : <MapIcon className="mr-1" size={14} />}
+                                    <span className="whitespace-nowrap uppercase">{showMap ? "Tutup Peta" : "Pilih di Peta"}</span>
                                 </button>
                             </div>
 
                             {showMap && (
-                                <div className="h-64 w-full rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner mt-2">
-                                    <MapContainer center={centerMadukara} zoom={13} style={{ height: '100%', width: '100%' }}>
-                                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                        <LocationPicker />
-                                    </MapContainer>
-                                    <p className="text-[9px] bg-yellow-50 text-yellow-700 text-center py-1 font-bold">KLIK PADA PETA UNTUK MENENTUKAN TITIK</p>
+                                <div className="relative">
+                                    <div className="h-64 w-full rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner mt-2">
+                                        <MapContainer 
+                                            center={data.latitude && data.longitude ? [data.latitude, data.longitude] : centerMadukara} 
+                                            zoom={13} 
+                                            style={{ height: '100%', width: '100%' }}
+                                        >
+                                            <ChangeView center={data.latitude && data.longitude ? [data.latitude, data.longitude] : centerMadukara} />
+                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                            <LocationPicker />
+                                        </MapContainer>
+                                    </div>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setIsMapFullscreen(true)}
+                                        className="absolute top-4 right-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 text-blue-900 active:scale-90 transition-all z-[400]"
+                                    >
+                                        <Maximize2 size={18} />
+                                    </button>
+                                    <p className="text-[9px] bg-yellow-50 text-yellow-700 text-center py-1 font-bold rounded-b-xl border-x border-b border-gray-200">
+                                        KLIK PADA PETA UNTUK MENENTUKAN TITIK
+                                    </p>
+                                </div>
+                            )}
+
+                            {isMapFullscreen && (
+                                <div className="fixed inset-0 z-[9999] bg-white flex flex-col">
+                                    <div className="p-4 flex items-center justify-between bg-blue-900 text-white">
+                                        <div className="flex items-center gap-2">
+                                            <MapPin size={20} />
+                                            <span className="font-bold text-sm">Pilih Lokasi Presisi</span>
+                                        </div>
+                                        <button onClick={() => setIsMapFullscreen(false)} className="bg-white/20 p-2 rounded-full hover:bg-white/30 transition">
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 w-full relative">
+                                        <MapContainer 
+                                            center={data.latitude && data.longitude ? [data.latitude, data.longitude] : centerMadukara} 
+                                            zoom={15} 
+                                            style={{ height: '100%', width: '100%' }}
+                                        >
+                                            <ChangeView center={data.latitude && data.longitude ? [data.latitude, data.longitude] : centerMadukara} />
+                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                            <LocationPicker />
+                                        </MapContainer>
+                                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[500] w-full px-6">
+                                            <div className="bg-blue-900/90 backdrop-blur-md text-white text-center py-3 px-4 rounded-2xl shadow-2xl border border-white/20">
+                                                <p className="text-[11px] font-bold uppercase tracking-widest mb-1">Sentuh lokasi pada peta</p>
+                                                <p className="text-[10px] text-blue-200 opacity-80">Geser dan perbesar untuk akurasi maksimal</p>
+                                                <button onClick={() => setIsMapFullscreen(false)} className="mt-3 w-full bg-yellow-400 text-blue-900 py-2 rounded-xl font-black text-xs uppercase">
+                                                    Konfirmasi Lokasi
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -250,11 +306,17 @@ export default function CreateReport({ auth }) {
                         <button 
                             type="submit" 
                             disabled={processing}
-                            className="w-full bg-yellow-400 text-blue-900 font-black py-4 rounded-xl shadow-lg shadow-yellow-100 hover:bg-yellow-500 transition transform active:scale-95 uppercase tracking-widest"
+                            className="w-full bg-yellow-400 text-blue-900 font-black py-4 px-4 rounded-xl shadow-lg shadow-yellow-100 hover:bg-yellow-500 transition transform active:scale-95 uppercase text-xs sm:text-sm tracking-widest flex items-center justify-center whitespace-nowrap"
                         >
-                            {processing ? 'Sedang Mengirim...' : 'Kirim Laporan Warga'}
+                            {processing ? (
+                                <>
+                                    <Loader2 className="animate-spin mr-2" size={18} />
+                                    Sedang Mengirim...
+                                </>
+                            ) : (
+                                'Kirim Laporan Warga'
+                            )}
                         </button>
-
                     </form>
                 </div>
             </div>
