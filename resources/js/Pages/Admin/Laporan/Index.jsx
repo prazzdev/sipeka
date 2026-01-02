@@ -88,7 +88,6 @@ export default function Index({ auth, reports, filters }) {
         >
             <Head title="Kelola Laporan" />
 
-            {/* Modal Tanggapi tetap sama */}
             <Modal show={isModalOpen} onClose={closeModal} maxWidth="2xl">
                 <form onSubmit={submitStatus} className="p-6">
                     <h2 className="text-xl font-black text-blue-900 mb-6 flex items-center gap-2">
@@ -140,7 +139,6 @@ export default function Index({ auth, reports, filters }) {
             </Modal>
 
             <div className="py-8">
-                {/* Filter Bar (tetap sama) */}
                 <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
                     <div className="relative w-full md:w-64">
                         <form onSubmit={(e) => { e.preventDefault(); handleFilterChange('search', e.target.search.value); }}>
@@ -169,13 +167,16 @@ export default function Index({ auth, reports, filters }) {
                         </select>
                     </div>
                     <div className="flex items-center gap-2">
+                        <select value={filters.sort || 'latest'} onChange={(e) => handleFilterChange('sort', e.target.value)} className="rounded-lg border-gray-300 text-sm font-bold">
+                            <option value="latest">Terbaru</option>
+                            <option value="upvote">Populer</option>
+                        </select>
                         <a href={route('admin.export', filters)} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center shadow-sm">
                             <Printer size={16} className="mr-2" /> Export
                         </a>
                     </div>
                 </div>
 
-                {/* Tabel */}
                 <div className="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -195,15 +196,15 @@ export default function Index({ auth, reports, filters }) {
                                         <tr key={report.id} className="hover:bg-gray-50 transition">
                                             <td className="px-6 py-4 text-sm text-gray-500">{(reports.current_page - 1) * reports.per_page + index + 1}</td>
                                             <td className="px-6 py-4 text-sm font-bold text-gray-700">{report.nomor_laporan}</td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-sm font-bold text-gray-900">{report.user.name}</div>
-                                                <div className="text-xs text-gray-400">{new Date(report.created_at).toLocaleDateString('id-ID')}</div>
+                                            <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                                                <div>{report.user.name}</div>
+                                                <div className="text-xs text-gray-400 font-normal">{new Date(report.created_at).toLocaleDateString('id-ID')}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-semibold text-blue-900">{report.judul_laporan}</div>
                                                 <div className="text-sm text-gray-600 flex items-center">
                                                     <span className="truncate max-w-[150px]">{report.lokasi_detail}</span>
-                                                    <a href={`http://maps.google.com/?q=${report.latitude},${report.longitude}`} target="_blank" className="ml-1 text-blue-500"><ExternalLink size={14} /></a>
+                                                    <a href={`https://www.google.com/maps/search/?api=1&query=${report.latitude},${report.longitude}`} target="_blank" className="ml-1 text-blue-500"><ExternalLink size={14} /></a>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -211,7 +212,7 @@ export default function Index({ auth, reports, filters }) {
                                                     {report.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-6 py-4 text-center text-sm font-medium">
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <button onClick={() => openModal(report)} className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-800 transition text-sm shadow-sm whitespace-nowrap">
                                                         Tanggapi
@@ -225,17 +226,38 @@ export default function Index({ auth, reports, filters }) {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-20 text-center text-gray-500 font-bold">Data tidak ditemukan</td>
+                                        <td colSpan="6" className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="p-4 bg-gray-50 rounded-full mb-4">
+                                                    <Search size={40} className="text-gray-300" />
+                                                </div>
+                                                <h3 className="text-gray-900 font-bold text-lg">
+                                                    {filters.search ? 'Laporan tidak ditemukan' : 'Belum ada laporan'}
+                                                </h3>
+                                                <p className="text-gray-500 text-sm max-w-xs mx-auto mt-1">
+                                                    {filters.search 
+                                                        ? `Tidak ada hasil untuk kata kunci "${filters.search}". Coba gunakan kata kunci lain.` 
+                                                        : 'Saat ini belum ada data laporan yang masuk ke dalam sistem.'}
+                                                </p>
+                                                {filters.search && (
+                                                    <button 
+                                                        onClick={() => router.get(route('admin.laporan.index'))}
+                                                        className="mt-4 text-blue-900 font-bold text-xs uppercase tracking-widest hover:underline"
+                                                    >
+                                                        Bersihkan Pencarian
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
 
-                    {/* PAGINATION SECTION */}
                     <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
                         <div className="text-xs text-gray-500 font-bold uppercase tracking-widest">
-                            Menampilkan {reports.from} - {reports.to} dari {reports.total} Laporan
+                            Menampilkan {reports.from || 0} - {reports.to || 0} dari {reports.total || 0} Laporan
                         </div>
                         <div className="flex gap-2">
                             {reports.links.map((link, i) => (
