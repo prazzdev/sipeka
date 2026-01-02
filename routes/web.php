@@ -7,7 +7,6 @@ use App\Http\Controllers\CommentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\RoleMiddleware;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
@@ -16,32 +15,17 @@ Route::get('/', function () {
     ]);
 })->name('landing');
 
-
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Halaman Buat Laporan
-    Route::get('/laporan/buat', function () {
-        return Inertia::render('User/CreateReport');
-    })->name('laporan.create');
-    // Simpan Laporan
-    Route::post('/laporan', [ReportController::class, 'store'])->name('laporan.store');
-    
     // Halaman Detail Laporan
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->name('laporan.show');
     // Hapus Laporan
     Route::delete('/laporan/{report}', [ReportController::class, 'destroy'])->name('laporan.destroy');
     // Halaman Laporan Saya
     Route::get('/laporan-saya', [ReportController::class, 'myReports'])->name('laporan.saya');
-
-    // Halaman Peta
-    Route::get('/peta', [ReportController::class, 'map'])->name('peta.index');
 
     // Halaman Langkah Melapor
     Route::get('/langkah-melapor', function () {
@@ -51,7 +35,12 @@ Route::middleware('auth')->group(function () {
 
 // Route khusus Admin & Kadis
 Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
+    // 1. Route Dashboard (Hanya Statistik)
     Route::get('/admin/dashboard', [ReportController::class, 'adminDashboard'])->name('admin.dashboard');
+    
+    // 2. Route Manajemen Laporan (Hanya Tabel) - INI YANG BARU
+    Route::get('/admin/laporan', [ReportController::class, 'adminIndex'])->name('admin.laporan.index');
+    
     Route::get('/admin/export-pdf', [ReportController::class, 'exportPdf'])->name('admin.export');
     
     // Halaman kelola laporan & update status
@@ -62,15 +51,12 @@ Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
     Route::post('/laporan/{report}/komentar', [CommentController::class, 'store'])->name('komentar.store');
     Route::patch('/admin/comment/{comment}', [CommentController::class, 'update'])->name('admin.comment.update');
     Route::delete('/admin/comment/{comment}', [CommentController::class, 'destroy'])->name('admin.comment.destroy');
-
-    // Route::delete('/komentar/{comment}', [CommentController::class, 'destroy'])->name('komentar.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Beranda SIPEKA
     Route::get('/beranda', [ReportController::class, 'index'])->name('beranda');
 
-    // Tambahkan baris ini di bawah route beranda Anda
     Route::get('/dashboard', function () {
         return redirect()->route('beranda');
     })->name('dashboard');

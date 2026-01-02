@@ -140,9 +140,39 @@ class ReportController extends Controller
         ]);
     }
 
+    // --- FUNGSI BARU UNTUK DASHBOARD STATISTIK ---
     public function adminDashboard(Request $request)
     {
-        // Ambil parameter dari request
+        $monthFilter = $request->query('month'); 
+        $yearFilter = $request->query('year');
+
+        $query = Report::query();
+
+        if ($monthFilter && $monthFilter !== 'all') {
+            $query->whereMonth('created_at', $monthFilter);
+        }
+        if ($yearFilter) {
+            $query->whereYear('created_at', $yearFilter);
+        }
+
+        $stats = [
+            'total' => (clone $query)->count(),
+            'pending' => (clone $query)->where('status', 'menunggu')->count(),
+            'proses' => (clone $query)->where('status', 'diproses')->count(),
+            'selesai' => (clone $query)->where('status', 'selesai')->count(),
+            'hari_ini' => Report::whereDate('created_at', now())->count(), 
+            'bulan_ini' => Report::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+        ];
+
+        return Inertia::render('Admin/Dashboard', [
+            'stats' => $stats,
+            'filters' => $request->only(['month', 'year'])
+        ]);
+    }
+
+    // --- FUNGSI BARU UNTUK TABEL LAPORAN ADMIN ---
+    public function adminIndex(Request $request)
+    {
         $statusFilter = $request->query('status');
         $sortBy = $request->query('sort', 'latest');
         $search = $request->query('search');
@@ -167,7 +197,7 @@ class ReportController extends Controller
             $query->where('status', $statusFilter);
         }
 
-        // --- Filter Bulan & Tahun (Baru) ---
+        // --- Filter Bulan & Tahun ---
         if ($monthFilter && $monthFilter !== 'all') {
             $query->whereMonth('created_at', $monthFilter);
         }
@@ -184,24 +214,8 @@ class ReportController extends Controller
 
         $reports = $query->paginate(10)->withQueryString();
         
-        // Kita buat clone query agar tidak terganggu pagination
-        $statQuery = clone $query;
-
-        // 4. Statistik Lengkap
-        // --- Statistik (Gunakan Query yang sama agar sinkron) ---
-        
-        $stats = [
-            'total' => $statQuery->count(),
-            'pending' => (clone $statQuery)->where('status', 'menunggu')->count(),
-            'proses' => (clone $statQuery)->where('status', 'diproses')->count(),
-            'selesai' => (clone $statQuery)->where('status', 'selesai')->count(),
-            'hari_ini' => Report::whereDate('created_at', now())->count(), // Tetap global
-            'bulan_ini' => Report::whereMonth('created_at', now()->month)->count(), // Tetap global
-        ];
-
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('Admin/Laporan/Index', [
             'reports' => $reports,
-            'stats' => $stats,
             'filters' => $request->only(['status', 'sort', 'search', 'month', 'year'])
         ]);
     }
@@ -335,7 +349,6 @@ class ReportController extends Controller
         }
 
         // Karena menggunakan SoftDeletes, kita TIDAK menghapus file di storage dulu
-        // agar data tetap utuh jika sewaktu-waktu di-restore oleh developer.
         $report->delete(); 
 
         // Jika yang menghapus admin, arahkan ke dashboard, jika user arahkan ke beranda
