@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, Link } from '@inertiajs/react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Maximize2, X, MapPin, ChevronRight } from 'lucide-react';
+// Import LayersControl untuk fitur switch map
+import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
+import { Maximize2, X, MapPin, ChevronRight, Eye } from 'lucide-react';
 import L from 'leaflet';
 
 const createCustomIcon = (status) => {
@@ -82,7 +83,7 @@ export default function MapPage({ auth, reports, filters }) {
 
             <div className="py-6 font-sans">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {/* Filter & Live Monitoring Header */}
+                    {/* Header: Filter & Jam */}
                     <div className="flex flex-col md:flex-row justify-between items-end mb-4 px-2 gap-4">
                         <div className="flex gap-2 w-full md:w-auto">
                             <div className="flex flex-col">
@@ -122,7 +123,7 @@ export default function MapPage({ auth, reports, filters }) {
                         </div>
                     </div>
 
-                    {/* Map Area */}
+                    {/* Map Container Wrapper */}
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 relative group">
                         <div style={{ height: '70vh', width: '100%' }}>
                             <MapContainer 
@@ -131,10 +132,21 @@ export default function MapPage({ auth, reports, filters }) {
                                 scrollWheelZoom={true}
                                 style={{ height: '100%', width: '100%' }}
                             >
-                                <TileLayer
-                                    attribution='&copy; OpenStreetMap'
-                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                />
+                                {/* Penambahan LayersControl untuk Switch Map */}
+                                <LayersControl position="topright">
+                                    <LayersControl.BaseLayer checked name="Peta Grafik">
+                                        <TileLayer
+                                            attribution='&copy; OpenStreetMap'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+                                    </LayersControl.BaseLayer>
+                                    <LayersControl.BaseLayer name="Satelit">
+                                        <TileLayer
+                                            attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
+                                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                        />
+                                    </LayersControl.BaseLayer>
+                                </LayersControl>
 
                                 {reports.map((report) => (
                                     <Marker 
@@ -160,8 +172,6 @@ export default function MapPage({ auth, reports, filters }) {
                                                 />
                                                 <h3 className="font-bold text-blue-900 text-sm leading-tight mb-1">{report.judul_laporan}</h3>
                                                 <p className="text-[10px] text-gray-500 mb-3 leading-tight">{report.lokasi_detail}</p>
-                                                
-                                                {/* Penyesuaian Warna Teks Link Menjadi Putih */}
                                                 <Link 
                                                     href={route('laporan.show', report.id)}
                                                     className="flex items-center justify-center bg-blue-900 !text-white py-1.5 rounded-md text-[10px] font-bold hover:bg-blue-800 transition shadow-sm uppercase w-full no-underline"
@@ -178,7 +188,7 @@ export default function MapPage({ auth, reports, filters }) {
                         <button 
                             type="button"
                             onClick={() => setIsMapFullscreen(true)}
-                            className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 text-blue-900 hover:bg-white active:scale-90 transition-all z-[400]"
+                            className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 text-blue-900 hover:bg-white active:scale-90 transition-all z-[400]"
                         >
                             <Maximize2 size={18} />
                         </button>
@@ -200,8 +210,27 @@ export default function MapPage({ auth, reports, filters }) {
                                 </button>
                             </div>
                             <div className="flex-1 w-full">
-                                <MapContainer center={centerMadukara} zoom={14} style={{ height: '100%', width: '100%' }}>
-                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                <MapContainer 
+                                    center={centerMadukara} 
+                                    zoom={14} 
+                                    style={{ height: '100%', width: '100%' }}
+                                >
+                                    {/* LayersControl juga diterapkan di Fullscreen */}
+                                    <LayersControl position="topright">
+                                        <LayersControl.BaseLayer checked name="Peta Grafik">
+                                            <TileLayer
+                                                attribution='&copy; OpenStreetMap'
+                                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            />
+                                        </LayersControl.BaseLayer>
+                                        <LayersControl.BaseLayer name="Satelit">
+                                            <TileLayer
+                                                attribution='Tiles &copy; Esri &mdash; Source: Esri'
+                                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                            />
+                                        </LayersControl.BaseLayer>
+                                    </LayersControl>
+
                                     {reports.map((report) => (
                                         <Marker key={`fs-${report.id}`} position={[report.latitude, report.longitude]} icon={createCustomIcon(report.status)}>
                                             <Popup>
