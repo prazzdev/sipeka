@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Link } from '@inertiajs/react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Maximize2, X, MapPin } from 'lucide-react'; // Tambahan ikon
+import { Maximize2, X, MapPin, ChevronRight } from 'lucide-react';
 import L from 'leaflet';
 
 const createCustomIcon = (status) => {
@@ -25,35 +25,30 @@ const createCustomIcon = (status) => {
 
 export default function MapPage({ auth, reports, filters }) {
     const centerMadukara = [-7.3891, 109.7185];
-    const [isMapFullscreen, setIsMapFullscreen] = useState(false); // State Fullscreen
+    const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
-    // State untuk filter lokal
     const [filterData, setFilterData] = useState({
         month: filters.month,
         year: filters.year
     });
 
-    // Jalankan filter saat dropdown berubah
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         const newData = { ...filterData, [name]: value };
         setFilterData(newData);
         
-        // Kirim request ke server menggunakan Inertia router
         router.get(route('peta.index'), newData, {
             preserveState: true,
             replace: true
         });
     };
 
-    // Logika Jam Real-time
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    // Opsi Bulan & Tahun
     const months = [
         { v: 'all', l: 'Semua Bulan' },
         { v: '01', l: 'Januari' }, { v: '02', l: 'Februari' }, { v: '03', l: 'Maret' },
@@ -65,7 +60,6 @@ export default function MapPage({ auth, reports, filters }) {
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
-    // Formatter Tanggal Indonesia
     const formattedDate = currentTime.toLocaleDateString('id-ID', {
         weekday: 'long',
         year: 'numeric',
@@ -86,15 +80,9 @@ export default function MapPage({ auth, reports, filters }) {
         >
             <Head title="Peta Laporan" />
 
-            <div className="py-6">
+            <div className="py-6 font-sans">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {/* Live Monitoring */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 px-2 gap-2">
-                        <div>
-                            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider">Live Monitoring</h3>
-                            <p className="text-[10px] text-gray-500 italic">Data sebaran kerusakan jalan di wilayah Kec. Madukara</p>
-                        </div>
-                    </div>
+                    {/* Filter & Live Monitoring Header */}
                     <div className="flex flex-col md:flex-row justify-between items-end mb-4 px-2 gap-4">
                         <div className="flex gap-2 w-full md:w-auto">
                             <div className="flex flex-col">
@@ -134,7 +122,7 @@ export default function MapPage({ auth, reports, filters }) {
                         </div>
                     </div>
 
-                    {/* Map Container Wrapper */}
+                    {/* Map Area */}
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 relative group">
                         <div style={{ height: '70vh', width: '100%' }}>
                             <MapContainer 
@@ -155,23 +143,31 @@ export default function MapPage({ auth, reports, filters }) {
                                         icon={createCustomIcon(report.status)}
                                     >
                                         <Popup>
-                                            <div className="w-48 p-1">
-                                                <img 
-                                                    src={report.foto_jalan ? `/storage/${report.foto_jalan}` : '/storage/no-image.png'} 
-                                                    className="rounded-lg mb-2 w-full h-24 object-cover" 
-                                                    alt="Foto"
-                                                />
-                                                <h3 className="font-bold text-blue-900 text-sm">{report.judul_laporan}</h3>
-                                                <p className="text-[10px] text-gray-500 mb-2">{report.lokasi_detail}</p>
-                                                <div className="flex justify-between items-center">
-                                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded text-white ${
+                                            <div className="w-48 p-1 font-sans">
+                                                <div className="mb-2">
+                                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm text-white uppercase tracking-wider ${
                                                         report.status === 'selesai' ? 'bg-green-500' :
                                                         report.status === 'diproses' ? 'bg-orange-500' :
                                                         report.status === 'ditolak' ? 'bg-red-500' : 'bg-blue-500'
                                                     }`}>
-                                                        {report.status.toUpperCase()}
+                                                        {report.status}
                                                     </span>
                                                 </div>
+                                                <img 
+                                                    src={report.foto_jalan ? `/storage/${report.foto_jalan}` : '/storage/no-image.png'} 
+                                                    className="rounded-lg mb-2 w-full h-24 object-cover shadow-sm" 
+                                                    alt="Foto"
+                                                />
+                                                <h3 className="font-bold text-blue-900 text-sm leading-tight mb-1">{report.judul_laporan}</h3>
+                                                <p className="text-[10px] text-gray-500 mb-3 leading-tight">{report.lokasi_detail}</p>
+                                                
+                                                {/* Penyesuaian Warna Teks Link Menjadi Putih */}
+                                                <Link 
+                                                    href={route('laporan.show', report.id)}
+                                                    className="flex items-center justify-center bg-blue-900 !text-white py-1.5 rounded-md text-[10px] font-bold hover:bg-blue-800 transition shadow-sm uppercase w-full no-underline"
+                                                >
+                                                    Lihat Detail <ChevronRight size={12} className="ml-1 !text-white" />
+                                                </Link>
                                             </div>
                                         </Popup>
                                     </Marker>
@@ -179,12 +175,10 @@ export default function MapPage({ auth, reports, filters }) {
                             </MapContainer>
                         </div>
 
-                        {/* Tombol Perbesar Floating */}
                         <button 
                             type="button"
                             onClick={() => setIsMapFullscreen(true)}
                             className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 text-blue-900 hover:bg-white active:scale-90 transition-all z-[400]"
-                            title="Perbesar Peta"
                         >
                             <Maximize2 size={18} />
                         </button>
@@ -193,8 +187,8 @@ export default function MapPage({ auth, reports, filters }) {
                     {/* MODAL FULLSCREEN MAP */}
                     {isMapFullscreen && (
                         <div className="fixed inset-0 z-[9999] bg-white flex flex-col">
-                            <div className="p-4 flex items-center justify-between bg-blue-900 text-white">
-                                <div className="flex items-center gap-2 font-bold">
+                            <div className="p-4 flex items-center justify-between bg-blue-900 text-white shadow-lg">
+                                <div className="flex items-center gap-2 font-bold uppercase text-sm tracking-wider">
                                     <MapPin size={20} />
                                     <span>Monitoring Peta Laporan</span>
                                 </div>
@@ -206,34 +200,34 @@ export default function MapPage({ auth, reports, filters }) {
                                 </button>
                             </div>
                             <div className="flex-1 w-full">
-                                <MapContainer 
-                                    center={centerMadukara} 
-                                    zoom={14} 
-                                    style={{ height: '100%', width: '100%' }}
-                                >
+                                <MapContainer center={centerMadukara} zoom={14} style={{ height: '100%', width: '100%' }}>
                                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                                     {reports.map((report) => (
-                                        <Marker 
-                                            key={`fs-${report.id}`} 
-                                            position={[report.latitude, report.longitude]}
-                                            icon={createCustomIcon(report.status)}
-                                        >
+                                        <Marker key={`fs-${report.id}`} position={[report.latitude, report.longitude]} icon={createCustomIcon(report.status)}>
                                             <Popup>
-                                                <div className="w-48 p-1">
+                                                <div className="w-48 p-1 font-sans">
+                                                    <div className="mb-2">
+                                                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm text-white uppercase tracking-wider ${
+                                                            report.status === 'selesai' ? 'bg-green-500' :
+                                                            report.status === 'diproses' ? 'bg-orange-500' :
+                                                            report.status === 'ditolak' ? 'bg-red-500' : 'bg-blue-500'
+                                                        }`}>
+                                                            {report.status}
+                                                        </span>
+                                                    </div>
                                                     <img 
                                                         src={report.foto_jalan ? `/storage/${report.foto_jalan}` : '/storage/no-image.png'} 
-                                                        className="rounded-lg mb-2 w-full h-24 object-cover" 
+                                                        className="rounded-lg mb-2 w-full h-24 object-cover shadow-sm" 
                                                         alt="Foto"
                                                     />
-                                                    <h3 className="font-bold text-blue-900 text-sm">{report.judul_laporan}</h3>
-                                                    <p className="text-[10px] text-gray-500 mb-2 tracking-tight leading-tight">{report.lokasi_detail}</p>
-                                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded text-white ${
-                                                        report.status === 'selesai' ? 'bg-green-500' :
-                                                        report.status === 'diproses' ? 'bg-orange-500' :
-                                                        report.status === 'ditolak' ? 'bg-red-500' : 'bg-blue-500'
-                                                    }`}>
-                                                        {report.status.toUpperCase()}
-                                                    </span>
+                                                    <h3 className="font-bold text-blue-900 text-sm leading-tight mb-1">{report.judul_laporan}</h3>
+                                                    <p className="text-[10px] text-gray-500 mb-3 leading-tight">{report.lokasi_detail}</p>
+                                                    <Link 
+                                                        href={route('laporan.show', report.id)}
+                                                        className="flex items-center justify-center bg-blue-900 !text-white py-1.5 rounded-md text-[10px] font-bold hover:bg-blue-800 transition shadow-sm uppercase w-full no-underline"
+                                                    >
+                                                        Lihat Detail <ChevronRight size={12} className="ml-1 !text-white" />
+                                                    </Link>
                                                 </div>
                                             </Popup>
                                         </Marker>
@@ -250,19 +244,18 @@ export default function MapPage({ auth, reports, filters }) {
                         <LegendItem color="bg-green-500" label="Selesai Dikerjakan" />
                         <LegendItem color="bg-red-500" label="Laporan Ditolak" />
                     </div>
-                    <p className="mt-2 text-center text-[10px] text-gray-400 italic">*Klik marker pada peta untuk melihat detail setiap laporan warga</p>
+                    <p className="mt-2 text-center text-[10px] text-gray-400 italic font-sans">*Klik marker pada peta untuk melihat detail setiap laporan warga</p>
                 </div>
             </div>
         </AuthenticatedLayout>
     );
 }
 
-// Komponen Kecil untuk Item Legenda
 function LegendItem({ color, label }) {
     return (
         <div className="flex items-center gap-2">
             <div className={`w-4 h-4 ${color} rounded-full border-2 border-white shadow-sm`}></div>
-            <span className="text-xs font-bold text-gray-600">{label}</span>
+            <span className="text-xs font-bold text-gray-600 font-sans">{label}</span>
         </div>
     );
 }
