@@ -49,6 +49,13 @@ const Content = ({
         alignmentClasses = 'ltr:origin-top-left rtl:origin-top-right start-0';
     } else if (align === 'right') {
         alignmentClasses = 'ltr:origin-top-right rtl:origin-top-left end-0';
+    } 
+    /* PENAMBAHAN: Logika untuk perataan ke atas (top).
+       Menggunakan 'bottom-full' agar posisi menu berada tepat di atas trigger,
+       dan 'origin-bottom' agar animasi skala muncul dari arah bawah ke atas.
+    */
+    else if (align === 'top') {
+        alignmentClasses = 'origin-bottom bottom-full mb-2 start-0';
     }
 
     let widthClasses = '';
@@ -69,7 +76,10 @@ const Content = ({
                 leaveTo="opacity-0 scale-95"
             >
                 <div
-                    className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    /* PERUBAHAN: Menghapus 'mt-2' default agar tidak konflik dengan 'mb-2' pada perataan top.
+                       Kelas margin ditangani di alignmentClasses masing-masing.
+                    */
+                    className={`absolute z-50 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
                 >
                     <div

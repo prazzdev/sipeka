@@ -186,7 +186,19 @@ function UserAccountBox({ user, isOpen }) {
                     )}
                 </button>
             </Dropdown.Trigger>
-            <Dropdown.Content align={isOpen ? "top" : "right"}>
+
+            {/* Penjelasan perubahan:
+                1. align="top" memberitahu komponen untuk muncul di atas pemicu (trigger).
+                2. contentClasses ditambahkan mt-0 mb-2 agar ada jarak sedikit dengan tombol di bawahnya.
+                3. Pastikan komponen Dropdown Anda mendukung props 'align="top"'.
+            */}
+            <Dropdown.Content 
+                align={isOpen ? "top" : "right"} 
+                contentClasses="py-1 bg-white mb-2 shadow-2xl border border-gray-100"
+            >
+                <div className="px-4 py-2 border-b border-gray-50 sm:hidden lg:block">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Pengaturan Akun</p>
+                </div>
                 <Dropdown.Link href={route('profile.edit')}>Edit Profil</Dropdown.Link>
                 <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-600 font-bold">Log Out</Dropdown.Link>
             </Dropdown.Content>
