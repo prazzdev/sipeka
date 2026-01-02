@@ -171,7 +171,7 @@ export default function Beranda({ auth, reports, filters }) {
                 {/* Tombol Go To Top */}
                 <button
                     onClick={goToTop}
-                    className={`fixed bottom-8 right-8 p-3 bg-blue-900 text-white rounded-full shadow-2xl transition-all duration-300 z-50 hover:bg-blue-800 ${
+                    className={`fixed bottom-[80px] right-8 p-3 bg-blue-900 text-white rounded-full shadow-2xl transition-all duration-300 z-50 hover:bg-blue-800 ${
                         showTopBtn ? 'opacity-100 scale-100' : 'opacity-0 scale-0 pointer-events-none'
                     }`}
                     title="Kembali ke atas"

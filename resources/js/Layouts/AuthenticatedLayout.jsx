@@ -134,7 +134,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 )}
 
                 <main className="py-6 flex-grow">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 max-sm:mb-[80px]">{children}</div>
                 </main>
 
                 <footer className="hidden sm:block py-4 border-t border-gray-200 bg-white mt-auto">

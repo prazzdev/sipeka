@@ -20,6 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Halaman Buat Laporan
+    Route::get('/laporan/buat', function () {
+        return Inertia::render('User/CreateReport');
+    })->name('laporan.create');
     // Halaman Detail Laporan
     Route::get('/laporan/{report}', [ReportController::class, 'show'])->name('laporan.show');
     // Hapus Laporan
@@ -63,11 +67,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Simpan Laporan
     Route::post('/laporan', [ReportController::class, 'store'])->name('laporan.store');
-
-    // Halaman Buat Laporan
-    Route::get('/laporan/buat', function () {
-        return Inertia::render('User/CreateReport');
-    })->name('laporan.create');
 
     // Halaman Peta
     Route::get('/peta', [ReportController::class, 'map'])->name('peta.index');
