@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Report;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UpvoteController;
@@ -13,6 +14,14 @@ Route::get("/", function () {
     return Inertia::render("LandingPage", [
         "canLogin" => Route::has("login"),
         "canRegister" => Route::has("register"),
+        "reports" => Report::select(
+            "id",
+            "judul_laporan",
+            "status",
+            "latitude",
+            "longitude",
+            "lokasi_detail",
+        )->get(),
     ]);
 })->name("landing");
 

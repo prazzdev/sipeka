@@ -6,18 +6,43 @@ import {
     MessageSquare,
     BarChart3,
     ArrowRight,
+    ChevronRight,
 } from "lucide-react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 
-export default function LandingPage({ canLogin, canRegister, auth }) {
-    // Ambil server_time dari props yang dikirim middleware
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+const createCustomIcon = (status) => {
+    let colorClass = "bg-blue-500";
+    if (status?.toLowerCase() === "selesai") colorClass = "bg-green-500";
+    if (status?.toLowerCase() === "diproses") colorClass = "bg-orange-500";
+    if (status?.toLowerCase() === "ditolak") colorClass = "bg-red-500";
+    if (status?.toLowerCase() === "diverifikasi") colorClass = "bg-blue-600";
+
+    return L.divIcon({
+        className: "custom-div-icon",
+        html: `<div class="w-5 h-5 ${colorClass} rounded-full border-2 border-white shadow-md flex items-center justify-center">
+                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+               </div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+    });
+};
+
+export default function LandingPage({
+    canLogin,
+    canRegister,
+    auth,
+    reports = [],
+}) {
     const { server_time } = usePage().props;
     const [loadTime, setLoadTime] = useState(0);
+    const centerMadukara = [-7.3891, 109.7185];
 
     useEffect(() => {
-        // Menghitung selisih waktu saat komponen React selesai dimuat
         const now = new Date().getTime();
-        // server_time dikirim dalam milidetik dari PHP microtime
         const diff = Math.abs((now - server_time) / 1000);
         setLoadTime(diff.toFixed(3));
     }, [server_time]);
@@ -115,25 +140,88 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                     </div>
                 </div>
 
-                {/* Ilustrasi/Preview Aplikasi */}
+                {/* MODIFIKASI: Peta Interaktif Sebaran Laporan GIS */}
                 <div className="relative">
                     <div className="absolute -inset-4 bg-yellow-400 rounded-[2rem] rotate-3 opacity-20"></div>
-                    <div className="relative bg-gray-900 rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-800 h-[500px]">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-black/40 flex items-center justify-center p-12 text-center">
-                            <div className="space-y-4">
-                                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                                    <div className="flex gap-2 mb-4">
-                                        <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                                        <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                                    </div>
-                                    <div className="h-4 w-48 bg-white/20 rounded mb-2"></div>
-                                    <div className="h-4 w-32 bg-white/10 rounded"></div>
-                                </div>
-                                <p className="text-white font-black text-2xl uppercase tracking-widest italic">
-                                    Dashboard GIS Sipeka
-                                </p>
+                    <div className="relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-900 h-[500px] flex flex-col">
+                        {/* Header Mockup Aplikasi */}
+                        <div className="bg-gray-900 px-4 py-3 flex items-center justify-between border-b border-gray-800 shrink-0">
+                            <div className="flex gap-1.5">
+                                <div className="w-2.5 h-2.5 bg-red-400 rounded-full"></div>
+                                <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full"></div>
+                                <div className="w-2.5 h-2.5 bg-green-400 rounded-full"></div>
                             </div>
+                            <span className="text-[10px] text-gray-400 font-mono font-bold uppercase tracking-wider">
+                                PETA SEBARAN LAPORAN JALAN KEC. MADUKARA (LIVE)
+                            </span>
+                            <div className="w-8"></div>
+                        </div>
+
+                        {/* Kontainer Utama Peta */}
+                        <div className="flex-1 w-full relative z-10">
+                            <MapContainer
+                                center={centerMadukara}
+                                zoom={12}
+                                scrollWheelZoom={false}
+                                style={{ height: "100%", width: "100%" }}
+                            >
+                                <TileLayer
+                                    attribution="&copy; OpenStreetMap"
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                {reports.map((report) => (
+                                    <Marker
+                                        key={`landing-${report.id}`}
+                                        position={[
+                                            report.latitude,
+                                            report.longitude,
+                                        ]}
+                                        icon={createCustomIcon(report.status)}
+                                    >
+                                        <Popup>
+                                            <div className="w-40 p-0.5 font-sans">
+                                                <div className="mb-1.5">
+                                                    <span
+                                                        className={`text-[7px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider ${
+                                                            report.status ===
+                                                            "selesai"
+                                                                ? "bg-green-500"
+                                                                : report.status ===
+                                                                    "diproses"
+                                                                  ? "bg-orange-500"
+                                                                  : report.status ===
+                                                                      "ditolak"
+                                                                    ? "bg-red-500"
+                                                                    : "bg-blue-500"
+                                                        }`}
+                                                    >
+                                                        {report.status}
+                                                    </span>
+                                                </div>
+                                                <h3 className="font-bold text-blue-900 text-xs leading-tight mb-0.5 truncate">
+                                                    {report.judul_laporan}
+                                                </h3>
+                                                <p className="text-[9px] text-gray-500 mb-2 truncate">
+                                                    {report.lokasi_detail}
+                                                </p>
+                                                <Link
+                                                    href={route(
+                                                        "laporan.show",
+                                                        report.id,
+                                                    )}
+                                                    className="flex items-center justify-center bg-blue-900 !text-white py-1 rounded text-[9px] font-bold hover:bg-blue-800 transition uppercase no-underline w-full"
+                                                >
+                                                    Detail{" "}
+                                                    <ChevronRight
+                                                        size={10}
+                                                        className="ml-0.5"
+                                                    />
+                                                </Link>
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                ))}
+                            </MapContainer>
                         </div>
                     </div>
                 </div>
@@ -180,7 +268,7 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
             <footer className="bg-gray-50 border-t border-gray-100 pt-16 pb-8">
                 <div className="max-w-7xl mx-auto px-6 md:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
-                        {/* Kolom 1: Branding & Deskripsi */}
+                        {/* Kolom 1 */}
                         <div className="space-y-4 text-center md:text-left">
                             <ApplicationLogo className="h-10 w-auto fill-current text-blue-900 mx-auto md:mx-0" />
                             <p className="text-gray-500 text-sm leading-relaxed">
@@ -190,7 +278,7 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                             </p>
                         </div>
 
-                        {/* Kolom 2: Tautan Cepat */}
+                        {/* Kolom 2 */}
                         <div className="text-center md:text-left">
                             <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">
                                 Navigasi
@@ -215,7 +303,7 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                             </ul>
                         </div>
 
-                        {/* Kolom 3: Info Instansi / Kontak */}
+                        {/* Kolom 3 */}
                         <div className="text-center md:text-left">
                             <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">
                                 Lokasi Pelayanan
@@ -229,14 +317,13 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                         </div>
                     </div>
 
-                    {/* Baris Paling Bawah dengan Load Time */}
+                    {/* Baris Paling Bawah */}
                     <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex flex-col items-center md:items-start gap-1">
                             <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                                &copy; 2025 SIPEKA Madukara. Projek Skripsi
+                                &copy; 2026 SIPEKA Madukara. Projek Skripsi
                                 Teknik Informatika.
                             </p>
-                            {/* WAKTU LOAD HALAMAN */}
                             <p className="text-[9px] text-gray-300 font-mono italic">
                                 Response Time: {loadTime}s
                             </p>
