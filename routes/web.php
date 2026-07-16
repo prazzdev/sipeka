@@ -8,71 +8,111 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('LandingPage', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+// Halaman Publik (Tanpa Login)
+Route::get("/", function () {
+    return Inertia::render("LandingPage", [
+        "canLogin" => Route::has("login"),
+        "canRegister" => Route::has("register"),
     ]);
-})->name('landing');
+})->name("landing");
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// ==========================================
+// ROUTE KHUSUS USER (ADMIN DILARANG MASUK)
+// ==========================================
+Route::middleware(["auth", "role:user"])->group(function () {
+    Route::get("/laporan/buat", function () {
+        return Inertia::render("User/CreateReport");
+    })->name("laporan.create");
 
-    // Halaman Buat Laporan
-    Route::get('/laporan/buat', function () {
-        return Inertia::render('User/CreateReport');
-    })->name('laporan.create');
-    // Halaman Detail Laporan
-    Route::get('/laporan/{report}', [ReportController::class, 'show'])->name('laporan.show');
-    // Hapus Laporan
-    Route::delete('/laporan/{report}', [ReportController::class, 'destroy'])->name('laporan.destroy');
+    Route::post("/laporan", [ReportController::class, "store"])->name(
+        "laporan.store",
+    );
+
     // Halaman Laporan Saya
-    Route::get('/laporan-saya', [ReportController::class, 'myReports'])->name('laporan.saya');
+    Route::get("/laporan-saya", [ReportController::class, "myReports"])->name(
+        "laporan.saya",
+    );
 
-    // Halaman Langkah Melapor
-    Route::get('/langkah-melapor', function () {
-        return Inertia::render('User/LangkahMelapor');
-    })->name('laporan.langkah');
+    // Toggle Upvote (Hanya User/Masyarakat)
+    Route::post("/laporan/{report}/upvote", [
+        UpvoteController::class,
+        "toggle",
+    ])->name("upvote.toggle");
 });
 
-// Route khusus Admin & Kadis
-Route::middleware(['auth', 'role:admin,kadis'])->group(function () {
-    // 1. Route Dashboard (Hanya Statistik)
-    Route::get('/admin/dashboard', [ReportController::class, 'adminDashboard'])->name('admin.dashboard');
-    
-    // 2. Route Manajemen Laporan (Hanya Tabel) - INI YANG BARU
-    Route::get('/admin/laporan', [ReportController::class, 'adminIndex'])->name('admin.laporan.index');
-    
-    Route::get('/admin/export-pdf', [ReportController::class, 'exportPdf'])->name('admin.export');
-    
-    // Halaman kelola laporan & update status
-    Route::post('/admin/laporan/{report}/status', [ReportController::class, 'updateStatus'])->name('admin.status.update');
-    Route::get('/admin/laporan/{report}/manage', [ReportController::class, 'manage'])->name('admin.report.manage');
-    
-    // Action Komentar
-    Route::post('/laporan/{report}/komentar', [CommentController::class, 'store'])->name('komentar.store');
-    Route::patch('/admin/comment/{comment}', [CommentController::class, 'update'])->name('admin.comment.update');
-    Route::delete('/admin/comment/{comment}', [CommentController::class, 'destroy'])->name('admin.comment.destroy');
+// ==========================================
+// ROUTE GLOBAL (Bisa diakses USER & ADMIN)
+// ==========================================
+Route::middleware("auth")->group(function () {
+    Route::get("/profile", [ProfileController::class, "edit"])->name(
+        "profile.edit",
+    );
+    Route::patch("/profile", [ProfileController::class, "update"])->name(
+        "profile.update",
+    );
+    Route::delete("/profile", [ProfileController::class, "destroy"])->name(
+        "profile.destroy",
+    );
+
+    // Detail Laporan & Hapus (Ditaruh DI BAWAH /laporan/buat agar tidak bentrok)
+    Route::get("/laporan/{report}", [ReportController::class, "show"])->name(
+        "laporan.show",
+    );
+    Route::delete("/laporan/{report}", [
+        ReportController::class,
+        "destroy",
+    ])->name("laporan.destroy");
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    // Beranda SIPEKA
-    Route::get('/beranda', [ReportController::class, 'index'])->name('beranda');
+Route::middleware(["auth", "verified"])->group(function () {
+    Route::get("/beranda", [ReportController::class, "index"])->name("beranda");
+    Route::get("/peta", [ReportController::class, "map"])->name("peta.index");
 
-    Route::get('/dashboard', function () {
-        return redirect()->route('beranda');
-    })->name('dashboard');
-    
-    // Simpan Laporan
-    Route::post('/laporan', [ReportController::class, 'store'])->name('laporan.store');
-
-    // Halaman Peta
-    Route::get('/peta', [ReportController::class, 'map'])->name('peta.index');
-
-    // Toggle Upvote
-    Route::post('/laporan/{report}/upvote', [UpvoteController::class, 'toggle'])->name('upvote.toggle');
+    Route::get("/dashboard", function () {
+        return redirect()->route("beranda");
+    })->name("dashboard");
 });
 
-require __DIR__.'/auth.php';
+// ==========================================
+// ROUTE KHUSUS ADMIN & KADIS
+// ==========================================
+Route::middleware(["auth", "role:admin"])->group(function () {
+    // Dashboard & Statistik
+    Route::get("/admin/dashboard", [
+        ReportController::class,
+        "adminDashboard",
+    ])->name("admin.dashboard");
+    Route::get("/admin/laporan", [ReportController::class, "adminIndex"])->name(
+        "admin.laporan.index",
+    );
+    Route::get("/admin/export-pdf", [
+        ReportController::class,
+        "exportPdf",
+    ])->name("admin.export");
+
+    // Kelola Status Laporan
+    Route::post("/admin/laporan/{report}/status", [
+        ReportController::class,
+        "updateStatus",
+    ])->name("admin.status.update");
+    Route::get("/admin/laporan/{report}/manage", [
+        ReportController::class,
+        "manage",
+    ])->name("admin.report.manage");
+
+    // Manajemen Komentar
+    Route::post("/laporan/{report}/komentar", [
+        CommentController::class,
+        "store",
+    ])->name("komentar.store");
+    Route::patch("/admin/comment/{comment}", [
+        CommentController::class,
+        "update",
+    ])->name("admin.comment.update");
+    Route::delete("/admin/comment/{comment}", [
+        CommentController::class,
+        "destroy",
+    ])->name("admin.comment.destroy");
+});
+
+require __DIR__ . "/auth.php";

@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { MapPin, ShieldCheck, MessageSquare, BarChart3, ArrowRight } from 'lucide-react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
+import React, { useState, useEffect } from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
+import {
+    MapPin,
+    ShieldCheck,
+    MessageSquare,
+    BarChart3,
+    ArrowRight,
+} from "lucide-react";
+import ApplicationLogo from "@/Components/ApplicationLogo";
 
 export default function LandingPage({ canLogin, canRegister, auth }) {
     // Ambil server_time dari props yang dikirim middleware
@@ -12,7 +18,7 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
         // Menghitung selisih waktu saat komponen React selesai dimuat
         const now = new Date().getTime();
         // server_time dikirim dalam milidetik dari PHP microtime
-        const diff = Math.abs((now - server_time) / 1000); 
+        const diff = Math.abs((now - server_time) / 1000);
         setLoadTime(diff.toFixed(3));
     }, [server_time]);
 
@@ -28,8 +34,8 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
 
                 <div className="flex items-center gap-3 md:gap-6">
                     {auth.user ? (
-                        <Link 
-                            href={route('beranda')} 
+                        <Link
+                            href={route("beranda")}
                             className="bg-blue-900 hover:bg-blue-800 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold transition-all shadow-lg shadow-blue-200"
                         >
                             Ke Beranda
@@ -37,16 +43,16 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                     ) : (
                         <>
                             {canLogin && (
-                                <Link 
-                                    href={route('login')} 
+                                <Link
+                                    href={route("login")}
                                     className="text-sm md:text-base font-bold text-gray-600 hover:text-blue-900 transition"
                                 >
                                     Masuk
                                 </Link>
                             )}
                             {canRegister && (
-                                <Link 
-                                    href={route('register')} 
+                                <Link
+                                    href={route("register")}
                                     className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-black shadow-lg shadow-yellow-200 transition-all active:scale-95 whitespace-nowrap"
                                 >
                                     Daftar
@@ -65,32 +71,41 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
                         </span>
-                        <span className="text-sm font-bold text-blue-900 uppercase tracking-widest">Kecamatan Madukara</span>
+                        <span className="text-sm font-bold text-blue-900 uppercase tracking-widest">
+                            Kecamatan Madukara
+                        </span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black leading-tight text-blue-900">
-                        Sistem Informasi Pelaporan <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">Kerusakan Jalan</span>.
+                        Sistem Informasi Pelaporan{" "}
+                        <span className="text-yellow-500 underline decoration-blue-900 decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8">
+                            Kerusakan Jalan
+                        </span>
+                        .
                     </h1>
                     <p className="text-xl text-gray-500 leading-relaxed max-w-lg">
-                        SIPEKA hadir untuk mempercepat pelaporan kerusakan jalan di Kecamatan Madukara secara transparan berbasis GIS. Bantu Dinas PUPR memetakan prioritas perbaikan dengan satu genggaman.
+                        SIPEKA hadir untuk mempercepat pelaporan kerusakan jalan
+                        di Kecamatan Madukara secara transparan berbasis GIS.
+                        Bantu Dinas PUPR memetakan prioritas perbaikan dengan
+                        satu genggaman.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         {auth.user ? (
-                            <Link 
-                                href={route('beranda')} 
+                            <Link
+                                href={route("beranda")}
                                 className="bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200"
                             >
                                 Masuk ke Aplikasi <ArrowRight size={20} />
                             </Link>
                         ) : (
                             <>
-                                <Link 
-                                    href={route('laporan.create')} 
+                                <Link
+                                    href={route("laporan.create")}
                                     className="bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition shadow-xl shadow-blue-200"
                                 >
                                     Laporkan Sekarang <ArrowRight size={20} />
                                 </Link>
-                                <Link 
-                                    href={route('peta.index')} 
+                                <Link
+                                    href={route("peta.index")}
                                     className="border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-gray-50 transition"
                                 >
                                     Lihat Peta
@@ -115,7 +130,9 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                                     <div className="h-4 w-48 bg-white/20 rounded mb-2"></div>
                                     <div className="h-4 w-32 bg-white/10 rounded"></div>
                                 </div>
-                                <p className="text-white font-black text-2xl uppercase tracking-widest italic">Dashboard GIS Sipeka</p>
+                                <p className="text-white font-black text-2xl uppercase tracking-widest italic">
+                                    Dashboard GIS Sipeka
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -126,15 +143,35 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
             <section className="bg-blue-900 py-24 px-8 mt-20">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16 space-y-4">
-                        <h2 className="text-yellow-400 font-black uppercase tracking-widest">Fitur Utama</h2>
-                        <h3 className="text-4xl font-black text-white">Bagaimana SIPEKA Bekerja?</h3>
+                        <h2 className="text-yellow-400 font-black uppercase tracking-widest">
+                            Fitur Utama
+                        </h2>
+                        <h3 className="text-4xl font-black text-white">
+                            Bagaimana SIPEKA Bekerja?
+                        </h3>
                     </div>
 
                     <div className="grid md:grid-cols-4 gap-8 text-center">
-                        <FeatureCard icon={<MapPin className="text-blue-900" />} title="Pemetaan GIS" desc="Laporan warga otomatis terpetakan di titik koordinat yang akurat." />
-                        <FeatureCard icon={<ShieldCheck className="text-blue-900" />} title="Verifikasi Dinas" desc="Admin memverifikasi laporan untuk memastikan data valid." />
-                        <FeatureCard icon={<BarChart3 className="text-blue-900" />} title="Prioritas Upvote" desc="Jalan dengan vote terbanyak diprioritaskan untuk perbaikan." />
-                        <FeatureCard icon={<MessageSquare className="text-blue-900" />} title="Update Progres" desc="Lihat tanggapan resmi dari dinas beserta foto perbaikan." />
+                        <FeatureCard
+                            icon={<MapPin className="text-blue-900" />}
+                            title="Pemetaan GIS"
+                            desc="Laporan warga otomatis terpetakan di titik koordinat yang akurat."
+                        />
+                        <FeatureCard
+                            icon={<ShieldCheck className="text-blue-900" />}
+                            title="Verifikasi Dinas"
+                            desc="Admin memverifikasi laporan untuk memastikan data valid."
+                        />
+                        <FeatureCard
+                            icon={<BarChart3 className="text-blue-900" />}
+                            title="Prioritas Upvote"
+                            desc="Jalan dengan vote terbanyak diprioritaskan untuk perbaikan."
+                        />
+                        <FeatureCard
+                            icon={<MessageSquare className="text-blue-900" />}
+                            title="Update Progres"
+                            desc="Lihat tanggapan resmi dari dinas beserta foto perbaikan."
+                        />
                     </div>
                 </div>
             </section>
@@ -143,32 +180,50 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
             <footer className="bg-gray-50 border-t border-gray-100 pt-16 pb-8">
                 <div className="max-w-7xl mx-auto px-6 md:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
-                        
                         {/* Kolom 1: Branding & Deskripsi */}
                         <div className="space-y-4 text-center md:text-left">
                             <ApplicationLogo className="h-10 w-auto fill-current text-blue-900 mx-auto md:mx-0" />
                             <p className="text-gray-500 text-sm leading-relaxed">
-                                Platform digital pelaporan kerusakan jalan untuk transparansi 
-                                dan percepatan pembangunan infrastruktur di wilayah Kecamatan Madukara.
+                                Platform digital pelaporan kerusakan jalan untuk
+                                transparansi dan percepatan pembangunan
+                                infrastruktur di wilayah Kecamatan Madukara.
                             </p>
                         </div>
 
                         {/* Kolom 2: Tautan Cepat */}
                         <div className="text-center md:text-left">
-                            <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">Navigasi</h4>
+                            <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">
+                                Navigasi
+                            </h4>
                             <ul className="space-y-2 text-sm text-gray-600 font-bold">
-                                <li><Link href={route('peta.index')} className="hover:text-blue-900 transition">Peta Kerusakan</Link></li>
-                                <li><Link href={route('laporan.langkah')} className="hover:text-blue-900 transition">Panduan Melapor</Link></li>
-                                <li><Link href={route('login')} className="hover:text-blue-900 transition">Masuk ke Sistem</Link></li>
+                                <li>
+                                    <Link
+                                        href={route("peta.index")}
+                                        className="hover:text-blue-900 transition"
+                                    >
+                                        Peta Kerusakan
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href={route("login")}
+                                        className="hover:text-blue-900 transition"
+                                    >
+                                        Masuk ke Sistem
+                                    </Link>
+                                </li>
                             </ul>
                         </div>
 
                         {/* Kolom 3: Info Instansi / Kontak */}
                         <div className="text-center md:text-left">
-                            <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">Lokasi Pelayanan</h4>
+                            <h4 className="font-black text-blue-900 uppercase text-xs tracking-widest mb-4">
+                                Lokasi Pelayanan
+                            </h4>
                             <p className="text-sm text-gray-600 leading-relaxed font-medium">
                                 Jl. May.Jend. Panjaitan No. 8<br />
-                                Telp. (0286) 591011 Fak. 591298<br />
+                                Telp. (0286) 591011 Fak. 591298
+                                <br />
                                 Banjarnegara, Jawa Tengah
                             </p>
                         </div>
@@ -178,17 +233,22 @@ export default function LandingPage({ canLogin, canRegister, auth }) {
                     <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex flex-col items-center md:items-start gap-1">
                             <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                                &copy; 2025 SIPEKA Madukara. Projek Skripsi Teknik Informatika.
+                                &copy; 2025 SIPEKA Madukara. Projek Skripsi
+                                Teknik Informatika.
                             </p>
                             {/* WAKTU LOAD HALAMAN */}
                             <p className="text-[9px] text-gray-300 font-mono italic">
                                 Response Time: {loadTime}s
                             </p>
                         </div>
-                        
+
                         <div className="flex gap-4">
-                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-900 font-black text-[10px]">TI</div>
-                            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-700 font-black text-[10px]">GIS</div>
+                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-900 font-black text-[10px]">
+                                TI
+                            </div>
+                            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-700 font-black text-[10px]">
+                                GIS
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -10,35 +10,36 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
-    public function index(Request $request) 
+    public function index(Request $request)
     {
-        $query = Report::with(['user', 'comments'])
-            ->withExists(['upvotes as upvoted' => function($query) {
-                $query->where('user_id', auth()->id());
-            }]);
+        $query = Report::with(["user", "comments"])->withExists([
+            "upvotes as upvoted" => function ($query) {
+                $query->where("user_id", auth()->id());
+            },
+        ]);
 
         // 1. Logika Pencarian (Search)
         if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('judul_laporan', 'like', "%{$request->search}%")
-                ->orWhere('lokasi_detail', 'like', "%{$request->search}%")
-                ->orWhere('nomor_laporan', 'like', "%{$request->search}%");
+            $query->where(function ($q) use ($request) {
+                $q->where("judul_laporan", "like", "%{$request->search}%")
+                    ->orWhere("lokasi_detail", "like", "%{$request->search}%")
+                    ->orWhere("nomor_laporan", "like", "%{$request->search}%");
             });
         }
 
         // 2. Logika Sorting
-        if ($request->sort === 'populer') {
-            $query->orderBy('total_upvote', 'desc');
+        if ($request->sort === "populer") {
+            $query->orderBy("total_upvote", "desc");
         } else {
             $query->latest();
         }
 
         $reports = $query->paginate(10)->withQueryString();
 
-        return Inertia::render('User/Beranda', [
-            'reports' => $reports,
+        return Inertia::render("User/Beranda", [
+            "reports" => $reports,
             // Pastikan search dikirim balik ke frontend agar input tetap terisi
-            'filters' => $request->only(['sort', 'search']) 
+            "filters" => $request->only(["sort", "search"]),
         ]);
     }
 
@@ -46,257 +47,289 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'judul_laporan' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'foto_jalan' => 'required|image|mimes:jpg,jpeg,png|max:2048', 
-            'latitude' => 'required', // Hapus numeric di sini karena data datang sebagai string dari FormData
-            'longitude' => 'required',
-            'lokasi_detail' => 'required|string',
+            "judul_laporan" => "required|string|max:255",
+            "deskripsi" => "required|string",
+            "foto_jalan" => "required|image|mimes:jpg,jpeg,png|max:2048",
+            "latitude" => "required",
+            "longitude" => "required",
+            "lokasi_detail" => "required|string",
         ]);
 
         try {
             $path = null;
-            if ($request->hasFile('foto_jalan')) {
-                $path = $request->file('foto_jalan')->store('laporan-jalan', 'public');
+            if ($request->hasFile("foto_jalan")) {
+                $path = $request
+                    ->file("foto_jalan")
+                    ->store("laporan-jalan", "public");
             }
 
             // GENERATE NOMOR LAPORAN
-            $today = now()->format('ymd');
-            $count = Report::whereDate('created_at', now())->count() + 1;
-            $nomorLaporan = $today . str_pad($count, 3, '0', STR_PAD_LEFT);
+            $today = now()->format("ymd");
+            $count = Report::whereDate("created_at", now())->count() + 1;
+            $nomorLaporan = $today . str_pad($count, 3, "0", STR_PAD_LEFT);
 
             $report = Report::create([
-                'user_id' => auth()->id(),
-                'nomor_laporan' => $nomorLaporan,
-                'judul_laporan' => $request->judul_laporan,
-                'deskripsi' => $request->deskripsi,
-                'foto_jalan' => $path,
-                'lokasi_kecamatan' => 'Madukara', 
-                'lokasi_detail' => $request->lokasi_detail,
-                'latitude' => (float) $request->latitude, // Cast ke float untuk keamanan DB
-                'longitude' => (float) $request->longitude, // Cast ke float untuk keamanan DB
-                'status' => 'menunggu', 
-                'total_upvote' => 0,
+                "user_id" => auth()->id(),
+                "nomor_laporan" => $nomorLaporan,
+                "judul_laporan" => $request->judul_laporan,
+                "deskripsi" => $request->deskripsi,
+                "foto_jalan" => $path,
+                "lokasi_kecamatan" => "Madukara",
+                "lokasi_detail" => $request->lokasi_detail,
+                "latitude" => (float) $request->latitude, // Cast ke float untuk keamanan DB
+                "longitude" => (float) $request->longitude, // Cast ke float untuk keamanan DB
+                "status" => "menunggu",
+                "total_upvote" => 0,
             ]);
 
             $report->comments()->create([
-                'user_id' => auth()->id(),
-                'pesan' => 'Laporan berhasil dibuat dan sedang mengantre untuk diverifikasi oleh admin.',
-                'status' => 'menunggu',
+                "user_id" => auth()->id(),
+                "pesan" =>
+                    "Laporan berhasil dibuat dan sedang mengantre untuk diverifikasi oleh admin.",
+                "status" => "menunggu",
             ]);
 
-            return redirect()->route('beranda')->with('message', 'Laporan berhasil dikirim!');
-
+            return redirect()
+                ->route("beranda")
+                ->with("message", "Laporan berhasil dikirim!");
         } catch (\Exception $e) {
             // Jika gagal simpan, hapus foto yang sudah terlanjur diupload (opsional)
-            if ($path) \Storage::disk('public')->delete($path);
-            
+            if ($path) {
+                \Storage::disk("public")->delete($path);
+            }
+
             // Kembalikan error agar ditangkap oleh onError di React
-            return back()->withErrors(['message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()]);
+            return back()->withErrors([
+                "message" =>
+                    "Terjadi kesalahan pada server: " . $e->getMessage(),
+            ]);
         }
     }
-    
+
     // Halaman Detail Laporan
     public function show(Report $report)
     {
         // Ambil detail laporan beserta pengunggahnya
         // Kita tambahkan orderBy agar histori progres urut dari yang terlama ke terbaru
-        $report->load(['user', 'comments' => function($query) {
-            $query->orderBy('created_at', 'asc');
-        }, 'comments.user']);
-        
-        // Cek apakah user login sudah upvote untuk status tombol di detail
-        $report->upvoted = $report->upvotes()->where('user_id', auth()->id())->exists();
+        $report->load([
+            "user",
+            "comments" => function ($query) {
+                $query->orderBy("created_at", "asc");
+            },
+            "comments.user",
+        ]);
 
-        return Inertia::render('User/DetailReport', [
-            'report' => $report
+        // Cek apakah user login sudah upvote untuk status tombol di detail
+        $report->upvoted = $report
+            ->upvotes()
+            ->where("user_id", auth()->id())
+            ->exists();
+
+        return Inertia::render("User/DetailReport", [
+            "report" => $report,
         ]);
     }
 
     public function map(Request $request)
     {
         // Default tahun ini, dan bulan bisa default ke 'all' atau bulan ini
-        $selectedMonth = $request->month ?? date('m'); 
-        $selectedYear = $request->year ?? date('Y');
+        $selectedMonth = $request->month ?? date("m");
+        $selectedYear = $request->year ?? date("Y");
 
         $query = Report::query();
 
         // Filter Tahun (Selalu dijalankan)
-        $query->whereYear('created_at', $selectedYear);
+        $query->whereYear("created_at", $selectedYear);
 
         // Filter Bulan (Hanya jika bukan 'all')
-        if ($selectedMonth !== 'all') {
-            $query->whereMonth('created_at', $selectedMonth);
+        if ($selectedMonth !== "all") {
+            $query->whereMonth("created_at", $selectedMonth);
         }
 
         $reports = $query->get();
 
-        return Inertia::render('User/Map', [
-            'reports' => $reports,
-            'filters' => [
-                'month' => $selectedMonth,
-                'year' => (string)$selectedYear
-            ]
+        return Inertia::render("User/Map", [
+            "reports" => $reports,
+            "filters" => [
+                "month" => $selectedMonth,
+                "year" => (string) $selectedYear,
+            ],
         ]);
     }
 
     // --- FUNGSI BARU UNTUK DASHBOARD STATISTIK ---
     public function adminDashboard(Request $request)
     {
-        $monthFilter = $request->query('month'); 
-        $yearFilter = $request->query('year');
+        $monthFilter = $request->query("month");
+        $yearFilter = $request->query("year");
 
         $query = Report::query();
 
-        if ($monthFilter && $monthFilter !== 'all') {
-            $query->whereMonth('created_at', $monthFilter);
+        if ($monthFilter && $monthFilter !== "all") {
+            $query->whereMonth("created_at", $monthFilter);
         }
         if ($yearFilter) {
-            $query->whereYear('created_at', $yearFilter);
+            $query->whereYear("created_at", $yearFilter);
         }
 
         $stats = [
-            'total' => (clone $query)->count(),
-            'pending' => (clone $query)->where('status', 'menunggu')->count(),
-            'proses' => (clone $query)->where('status', 'diproses')->count(),
-            'selesai' => (clone $query)->where('status', 'selesai')->count(),
-            'hari_ini' => Report::whereDate('created_at', now())->count(), 
-            'bulan_ini' => Report::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+            "total" => (clone $query)->count(),
+            "pending" => (clone $query)->where("status", "menunggu")->count(),
+            "proses" => (clone $query)->where("status", "diproses")->count(),
+            "selesai" => (clone $query)->where("status", "selesai")->count(),
+            "hari_ini" => Report::whereDate("created_at", now())->count(),
+            "bulan_ini" => Report::whereMonth("created_at", now()->month)
+                ->whereYear("created_at", now()->year)
+                ->count(),
         ];
 
-        return Inertia::render('Admin/Dashboard', [
-            'stats' => $stats,
-            'filters' => $request->only(['month', 'year'])
+        return Inertia::render("Admin/Dashboard", [
+            "stats" => $stats,
+            "filters" => $request->only(["month", "year"]),
         ]);
     }
 
     // --- FUNGSI BARU UNTUK TABEL LAPORAN ADMIN ---
     public function adminIndex(Request $request)
     {
-        $statusFilter = $request->query('status');
-        $sortBy = $request->query('sort', 'latest');
-        $search = $request->query('search');
-        $monthFilter = $request->query('month'); 
-        $yearFilter = $request->query('year');
+        $statusFilter = $request->query("status");
+        $sortBy = $request->query("sort", "latest");
+        $search = $request->query("search");
+        $monthFilter = $request->query("month");
+        $yearFilter = $request->query("year");
 
-        $query = Report::with('user');
+        $query = Report::with("user");
 
         // 1. Fitur Search (Nomor Laporan, Judul, atau Nama Pelapor)
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('nomor_laporan', 'like', "%{$search}%")
-                ->orWhere('judul_laporan', 'like', "%{$search}%")
-                ->orWhereHas('user', function($u) use ($search) {
-                    $u->where('name', 'like', "%{$search}%");
-                });
+            $query->where(function ($q) use ($search) {
+                $q->where("nomor_laporan", "like", "%{$search}%")
+                    ->orWhere("judul_laporan", "like", "%{$search}%")
+                    ->orWhereHas("user", function ($u) use ($search) {
+                        $u->where("name", "like", "%{$search}%");
+                    });
             });
         }
 
         // 2. Fitur Filter Status
         if ($statusFilter) {
-            $query->where('status', $statusFilter);
+            $query->where("status", $statusFilter);
         }
 
         // --- Filter Bulan & Tahun ---
-        if ($monthFilter && $monthFilter !== 'all') {
-            $query->whereMonth('created_at', $monthFilter);
+        if ($monthFilter && $monthFilter !== "all") {
+            $query->whereMonth("created_at", $monthFilter);
         }
         if ($yearFilter) {
-            $query->whereYear('created_at', $yearFilter);
+            $query->whereYear("created_at", $yearFilter);
         }
 
         // 3. Fitur Sorting
-        if ($sortBy === 'upvote') {
-            $query->orderBy('total_upvote', 'desc');
+        if ($sortBy === "upvote") {
+            $query->orderBy("total_upvote", "desc");
         } else {
             $query->latest();
         }
 
         $reports = $query->paginate(10)->withQueryString();
-        
-        return Inertia::render('Admin/Laporan/Index', [
-            'reports' => $reports,
-            'filters' => $request->only(['status', 'sort', 'search', 'month', 'year'])
+
+        return Inertia::render("Admin/Laporan/Index", [
+            "reports" => $reports,
+            "filters" => $request->only([
+                "status",
+                "sort",
+                "search",
+                "month",
+                "year",
+            ]),
         ]);
     }
 
     public function updateStatus(Request $request, Report $report)
     {
         $request->validate([
-            'status' => 'required|in:menunggu,diverifikasi,diproses,selesai,ditolak',
-            'pesan' => 'required|string|min:5',
-            'foto_tanggapan' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            "status" =>
+                "required|in:menunggu,diverifikasi,diproses,selesai,ditolak",
+            "pesan" => "required|string|min:5",
+            "foto_tanggapan" => "nullable|image|mimes:jpg,jpeg,png|max:2048",
         ]);
 
         $path = null;
-        if ($request->hasFile('foto_tanggapan')) {
-            $path = $request->file('foto_tanggapan')->store('tanggapan-admin', 'public');
+        if ($request->hasFile("foto_tanggapan")) {
+            $path = $request
+                ->file("foto_tanggapan")
+                ->store("tanggapan-admin", "public");
         }
 
         \DB::transaction(function () use ($request, $report, $path) {
             // 1. Update status laporan DAN isi kolom alasan_ditolak jika statusnya 'ditolak'
-            $updateData = ['status' => $request->status];
-            
-            if ($request->status === 'ditolak') {
-                $updateData['alasan_ditolak'] = $request->pesan;
+            $updateData = ["status" => $request->status];
+
+            if ($request->status === "ditolak") {
+                $updateData["alasan_ditolak"] = $request->pesan;
             } else {
                 // Jika sebelumnya ditolak lalu diubah jadi diverifikasi, hapus alasan penolakannya
-                $updateData['alasan_ditolak'] = null;
+                $updateData["alasan_ditolak"] = null;
             }
 
             $report->update($updateData);
 
             // 2. Buat histori/tanggapan (agar muncul di timeline)
             $report->comments()->create([
-                'user_id' => auth()->id(),
-                'pesan' => $request->status === 'ditolak' ? "[LAPORAN DITOLAK] " . $request->pesan : $request->pesan,
-                'status' => $request->status,
-                'foto_tanggapan' => $path, 
+                "user_id" => auth()->id(),
+                "pesan" =>
+                    $request->status === "ditolak"
+                        ? "[LAPORAN DITOLAK] " . $request->pesan
+                        : $request->pesan,
+                "status" => $request->status,
+                "foto_tanggapan" => $path,
             ]);
         });
 
-        return redirect()->back()->with('message', 'Progres laporan berhasil diperbarui!');
+        return redirect()
+            ->back()
+            ->with("message", "Progres laporan berhasil diperbarui!");
     }
 
     public function exportPdf(Request $request)
     {
         // 1. Ambil parameter filter (Termasuk Bulan dan Tahun)
-        $statusFilter = $request->query('status');
-        $search = $request->query('search');
-        $sortBy = $request->query('sort', 'latest');
-        $monthFilter = $request->query('month'); 
-        $yearFilter = $request->query('year');
+        $statusFilter = $request->query("status");
+        $search = $request->query("search");
+        $sortBy = $request->query("sort", "latest");
+        $monthFilter = $request->query("month");
+        $yearFilter = $request->query("year");
 
         // 2. Bangun Query
-        $query = Report::with('user');
+        $query = Report::with("user");
 
         // Fitur Search
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('nomor_laporan', 'like', "%{$search}%")
-                ->orWhere('judul_laporan', 'like', "%{$search}%")
-                ->orWhereHas('user', function($u) use ($search) {
-                    $u->where('name', 'like', "%{$search}%");
-                });
+            $query->where(function ($q) use ($search) {
+                $q->where("nomor_laporan", "like", "%{$search}%")
+                    ->orWhere("judul_laporan", "like", "%{$search}%")
+                    ->orWhereHas("user", function ($u) use ($search) {
+                        $u->where("name", "like", "%{$search}%");
+                    });
             });
         }
 
         // Fitur Filter Status
         if ($statusFilter) {
-            $query->where('status', $statusFilter);
+            $query->where("status", $statusFilter);
         }
 
         // Fitur Filter Bulan & Tahun (Sinkron dengan Dashboard)
-        if ($monthFilter && $monthFilter !== 'all') {
-            $query->whereMonth('created_at', $monthFilter);
+        if ($monthFilter && $monthFilter !== "all") {
+            $query->whereMonth("created_at", $monthFilter);
         }
         if ($yearFilter) {
-            $query->whereYear('created_at', $yearFilter);
+            $query->whereYear("created_at", $yearFilter);
         }
 
         // Fitur Sorting
-        if ($sortBy === 'upvote') {
-            $query->orderBy('total_upvote', 'desc');
+        if ($sortBy === "upvote") {
+            $query->orderBy("total_upvote", "desc");
         } else {
             $query->latest();
         }
@@ -305,21 +338,24 @@ class ReportController extends Controller
         $reports = $query->get();
 
         // 4. Logika Penamaan File yang Dinamis & Informatif
-        $dateNow = now()->format('d-m-Y');
-        $statusName = $statusFilter ? ucfirst($statusFilter) : 'Semua-Status';
-        $monthName = ($monthFilter && $monthFilter !== 'all') ? "-Bulan-{$monthFilter}" : "";
+        $dateNow = now()->format("d-m-Y");
+        $statusName = $statusFilter ? ucfirst($statusFilter) : "Semua-Status";
+        $monthName =
+            $monthFilter && $monthFilter !== "all"
+                ? "-Bulan-{$monthFilter}"
+                : "";
         $yearName = $yearFilter ? "-Tahun-{$yearFilter}" : "";
-        
+
         // Contoh: Laporan_SIPEKA_Selesai-Bulan-01-Tahun-2025_27-12-2025.pdf
         $fileName = "Laporan_SIPEKA_{$statusName}{$monthName}{$yearName}_{$dateNow}.pdf";
 
         // 5. Generate PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.reports', [
-            'reports' => $reports,
-            'status'  => $statusFilter ?: 'Semua Status', 
-            'date'    => $dateNow,
-            'month'   => $monthFilter,
-            'year'    => $yearFilter,
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView("pdf.reports", [
+            "reports" => $reports,
+            "status" => $statusFilter ?: "Semua Status",
+            "date" => $dateNow,
+            "month" => $monthFilter,
+            "year" => $yearFilter,
         ]);
 
         // 6. Download file
@@ -329,42 +365,56 @@ class ReportController extends Controller
     public function manage(Report $report)
     {
         // Load komentar beserta user admin yang membuatnya
-        $report->load(['comments.user', 'user']);
-        
-        return Inertia::render('Admin/Reports/Manage', [
-            'report' => $report
+        $report->load(["comments.user", "user"]);
+
+        return Inertia::render("Admin/Reports/Manage", [
+            "report" => $report,
         ]);
     }
 
     public function destroy(Report $report)
     {
         // Proteksi: Hanya pemilik laporan (jika masih menunggu) atau admin yang boleh menghapus
-        if (auth()->id() !== $report->user_id && auth()->user()->role !== 'admin') {
-            abort(403, 'Anda tidak memiliki otoritas.');
+        if (
+            auth()->id() !== $report->user_id &&
+            auth()->user()->role !== "admin"
+        ) {
+            abort(403, "Anda tidak memiliki otoritas.");
         }
 
         // Opsi tambahan: Admin tidak boleh menghapus laporan yang sudah selesai/diproses
-        if (auth()->user()->role === 'admin' && in_array($report->status, ['diproses', 'selesai'])) {
-            return redirect()->back()->with('error', 'Laporan yang sedang diproses atau selesai tidak dapat diarsipkan.');
+        if (
+            auth()->user()->role === "admin" &&
+            in_array($report->status, ["diproses", "selesai"])
+        ) {
+            return redirect()
+                ->back()
+                ->with(
+                    "error",
+                    "Laporan yang sedang diproses atau selesai tidak dapat diarsipkan.",
+                );
         }
 
         // Karena menggunakan SoftDeletes, kita TIDAK menghapus file di storage dulu
-        $report->delete(); 
+        $report->delete();
 
         // Jika yang menghapus admin, arahkan ke dashboard, jika user arahkan ke beranda
-        $redirectRoute = auth()->user()->role === 'admin' ? 'admin.dashboard' : 'beranda';
+        $redirectRoute =
+            auth()->user()->role === "admin" ? "admin.dashboard" : "beranda";
 
-        return redirect()->route($redirectRoute)->with('message', 'Laporan berhasil diarsipkan.');
+        return redirect()
+            ->route($redirectRoute)
+            ->with("message", "Laporan berhasil diarsipkan.");
     }
 
     public function myReports()
     {
-        $reports = Report::where('user_id', auth()->id())
+        $reports = Report::where("user_id", auth()->id())
             ->latest()
             ->paginate(10);
 
-        return Inertia::render('User/MyReports', [
-            'reports' => $reports
+        return Inertia::render("User/MyReports", [
+            "reports" => $reports,
         ]);
     }
 }
