@@ -20,7 +20,7 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "baseline-browser-mapping": "^2.10.43",
+        "baseline-browser-mapping": "^2.11.22",
         "caniuse-lite": "^1.0.30001806",
         "leaflet": "^1.9.4",
         "lucide-react": "^0.562.0",
